@@ -1,0 +1,63 @@
+{
+  "get_witnesses": {},
+  "get_peers": {},
+  "get_joint": {
+    "params": "string"
+  },
+  "get_last_mci": {},
+  "catchup": {
+    "params": {
+      "witnesses": "array",
+      "last_stable_mci": "number",
+      "last_known_mci": "number"
+    }
+  },
+  "get_hash_tree": {
+    "params": {
+      "from_ball": "string",
+      "to_ball": "string"
+    }
+  },
+  "subscribe": {
+    "params": {
+      "subscription_id": "string",
+      "last_mci": "number"
+    }
+  },
+  "light/get_history": {
+    "params": {
+      "witnesses": "array",
+      "addresses": "array"
+    }
+  },
+  "light/get_parents_and_last_ball_and_witness_list_unit": {
+    "params": {
+      "witnesses": "array"
+    }
+  },
+  "light/get_attestation": {
+    "params": {
+      "attestor_address": "string",
+      "field": "string",
+      "value": "string"
+    }
+  },
+  "light/get_attestations": {
+    "params": {
+      "address": "string"
+    }
+  },
+  "light/pick_divisible_coins_for_amount": {
+    "params": {
+      "asset": "string",
+      "addresses": "array",
+      "last_ball_mci": "number",
+      "amount": "number",
+      "spend_unconfirmed": "string"
+    }
+  },
+  "hub/get_bots": {},
+  "hub/get_asset_metadata": {
+    "params": "string"
+  }
+}
