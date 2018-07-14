@@ -1,4 +1,4 @@
-const Client = require('./client').Client;
+const Client = require('./client');
 const utils = require('./utils');
 
 exports.Client = Client;
