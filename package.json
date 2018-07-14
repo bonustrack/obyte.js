@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "The JavaScript library for Byteball",
   "dependencies": {
-    "kbyte": "0.0.2"
+    "bitcore-mnemonic": "^1.5.0",
+    "kbyte": "bonustrack/kbyte"
   },
   "devDependencies": {
     "eslint": "^4.18.0",
