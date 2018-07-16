@@ -1,2 +1,0 @@
-# byteball.js
-Byteball.js

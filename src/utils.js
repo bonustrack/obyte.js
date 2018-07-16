@@ -8,8 +8,7 @@ const generateRandomSeed = () => {
   return mnemonic.phrase;
 };
 
-const isSeedValid = seed =>
-  Mnemonic.isValid(seed);
+const isSeedValid = seed => Mnemonic.isValid(seed);
 
 exports.generateRandomSeed = generateRandomSeed;
 exports.isSeedValid = isSeedValid;

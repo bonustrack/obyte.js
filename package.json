@@ -2,20 +2,39 @@
   "name": "byteball",
   "version": "0.0.1",
   "description": "The JavaScript library for Byteball",
+  "main": "lib/byteball.js",
+  "scripts": {
+    "build": "webpack --env dev && webpack --env build && npm run test",
+    "dev": "webpack --progress --colors --watch --env dev",
+    "test": "mocha --require babel-register --colors ./test/*.spec.js",
+    "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js"
+  },
+  "license": "MIT",
   "dependencies": {
     "bitcore-mnemonic": "^1.5.0",
-    "kbyte": "bonustrack/kbyte"
+    "kbyte": "0.0.2",
+    "lodash.camelcase": "^4.3.0"
   },
   "devDependencies": {
-    "eslint": "^4.18.0",
-    "eslint-config-airbnb-base": "^12.1.0",
+    "@babel/cli": "^7.0.0-beta.51",
+    "@babel/core": "^7.0.0-beta.51",
+    "@babel/preset-env": "^7.0.0-beta.51",
+    "babel-eslint": "^8.0.3",
+    "babel-loader": "^8.0.0-beta.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^7.0.0-beta.3",
+    "babel-register": "^7.0.0-beta.3",
+    "chai": "^4.1.2",
+    "eslint": "^5.0.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-loader": "^2.0.0",
     "eslint-plugin-import": "^2.8.0",
-    "webpack": "^4.16.0"
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
-  "author": "Bonustrack",
-  "license": "MIT"
+    "jsdom": "11.11.0",
+    "jsdom-global": "3.0.2",
+    "mocha": "^4.0.1",
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.12.2",
+    "webpack-cli": "^3.0.8",
+    "yargs": "^10.0.3"
+  }
 }
