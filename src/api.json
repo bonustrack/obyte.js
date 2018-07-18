@@ -18,6 +18,11 @@
       "to_ball": "string"
     }
   },
+  "post_joint": {
+    "params": {
+      "unit": "object"
+    }
+  },
   "subscribe": {
     "params": {
       "subscription_id": "string",
