@@ -1,11 +1,10 @@
-const kbyte = require('kbyte');
-const camelCase = require('lodash.camelcase');
-const api = require('./api.json');
+import { Client as KbyteClient } from 'kbyte';
+import camelCase from 'lodash.camelcase';
+import api from './api.json';
 
-class Client {
+export default class Client {
   constructor(address) {
-    this.client = new kbyte.Client(address);
-
+    this.client = new KbyteClient(address);
     Object.keys(api).forEach((name) => {
       this[camelCase(name)] = (params, cb) => {
         if (!api[name].params && typeof params === 'function') {
@@ -28,5 +27,3 @@ class Client {
     });
   }
 }
-
-module.exports = Client;

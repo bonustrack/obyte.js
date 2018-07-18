@@ -1,4 +1,4 @@
-const Mnemonic = require('bitcore-mnemonic');
+import Mnemonic from 'bitcore-mnemonic';
 
 const generateRandomSeed = () => {
   let mnemonic = new Mnemonic();
@@ -10,5 +10,7 @@ const generateRandomSeed = () => {
 
 const isSeedValid = seed => Mnemonic.isValid(seed);
 
-exports.generateRandomSeed = generateRandomSeed;
-exports.isSeedValid = isSeedValid;
+export {
+  generateRandomSeed,
+  isSeedValid,
+};
