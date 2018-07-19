@@ -11,7 +11,8 @@
     "dev": "webpack --progress --colors --watch --env dev",
     "lint": "eslint 'src/**/*.js'",
     "prettier": "prettier 'src/**/*.js' --list-different",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "license": "MIT",
   "dependencies": {

@@ -6,8 +6,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-        name: Restore node_modules cache
-        key: dependency-cache-{{ checksum "package-lock.json" }}
+          name: Restore node_modules cache
+          key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
           name: Node version
           command: node --version
@@ -23,6 +23,12 @@ jobs:
       - run:
           name: test
           command: npm run test
+      - run:
+          name: coverage
+          command: npm run test:coverage
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
       - save_cache:
           name: Save node_modules cache
           key: dependency-cache-{{ checksum "package-lock.json" }}
