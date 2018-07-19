@@ -1,12 +1,14 @@
 import { Client as KbyteClient } from 'kbyte';
-import camelCase from 'lodash.camelcase';
 import api from './api.json';
 
 export default class Client {
   constructor(address) {
     this.client = new KbyteClient(address);
     Object.keys(api).forEach(name => {
-      this[camelCase(name)] = (params, cb) => {
+      const nameWithCamelCase = name.split('/').pop().split('_')
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .join('').replace(/^\w/, c => c.toLowerCase());
+      this[nameWithCamelCase] = (params, cb) => {
         if (!api[name].params && typeof params === 'function') {
           cb = params; // eslint-disable-line no-param-reassign
         }
