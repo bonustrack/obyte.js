@@ -7,6 +7,7 @@ module.exports = {
     jest: true,
   },
   rules: {
+    'no-console': 'off',
     'prettier/prettier': 'error',
   },
 };

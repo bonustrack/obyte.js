@@ -12,7 +12,7 @@ const client = new kbyte.Client('wss://byteball.org/bb');
 const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
-const compose = async (app, payload, { address, privKeyBuf, definition }, cb) => {
+const compose = async (app, payload, { address, privKeyBuf, definition }) => {
   const objMessage = { app };
   objMessage.payload_hash = objectHash.getBase64Hash(payload);
   objMessage.payload_location = 'inline';
@@ -61,7 +61,7 @@ const compose = async (app, payload, { address, privKeyBuf, definition }, cb) =>
   const assocLengthsBySigningPaths = { r: 88 };
   const arrSigningPaths = Object.keys(assocLengthsBySigningPaths);
   assocSigningPaths[address] = arrSigningPaths;
-  for (let j = 0; j < arrSigningPaths.length; j++) {
+  for (let j = 0; j < arrSigningPaths.length; j += 1) {
     objAuthor.authentifiers[arrSigningPaths[j]] = repeatString(
       '-',
       assocLengthsBySigningPaths[arrSigningPaths[j]],
