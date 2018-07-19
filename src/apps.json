@@ -1,0 +1,32 @@
+{
+  "attestation": {
+    "params": {
+      "address": "string",
+      "profile": "object"
+    }
+  },
+  "data": {
+    "params": "object"
+  },
+  "data_feed": {
+    "params": "object"
+  },
+  "poll": {
+    "params": {
+      "question": "string",
+      "choices": "array"
+    }
+  },
+  "profile": {
+    "params": "object"
+  },
+  "text": {
+    "params": "string"
+  },
+  "vote": {
+    "params": {
+      "unit": "string",
+      "choice": "string"
+    }
+  }
+}
