@@ -12,10 +12,10 @@ describe('Client', () => {
   });
 
   it('should support callbacks', (done) => {
-    client.getJoint('12345', () => done());
+    client.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=', () => done());
   });
 
   it('should support promises', (done) => {
-    client.getJoint('12345').then(() => done());
+    client.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(() => done());
   });
 });
