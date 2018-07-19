@@ -9,6 +9,7 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
+    "lint": "eslint 'src/**/*.js'",
     "prettier": "prettier 'src/**/*.js' --list-different",
     "test": "jest"
   },
