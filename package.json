@@ -17,7 +17,6 @@
   "license": "MIT",
   "dependencies": {
     "bitcore-mnemonic": "^1.5.0",
-    "bluebird": "^3.5.1",
     "byteballcore": "^0.2.90",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.2",
