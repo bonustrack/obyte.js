@@ -20,8 +20,7 @@
     "byteballcore": "^0.2.90",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.2",
-    "kbyte": "0.0.2",
-    "lodash.camelcase": "^4.3.0"
+    "kbyte": "0.0.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.51",
