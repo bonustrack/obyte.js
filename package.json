@@ -9,11 +9,18 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test": "jest"
+    "lint": "eslint 'src/**/*.js'",
+    "prettier": "prettier 'src/**/*.js' --list-different",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "license": "MIT",
   "dependencies": {
     "bitcore-mnemonic": "^1.5.0",
+    "bluebird": "^3.5.1",
+    "byteballcore": "^0.2.90",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.2",
     "kbyte": "0.0.2",
     "lodash.camelcase": "^4.3.0"
   },
@@ -30,6 +37,7 @@
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.8.0",
     "jest": "^23.4.1",
+    "prettier": "^1.13.7",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8",

@@ -9,18 +9,20 @@ import ecdsaSig from 'byteballcore/signature';
 bluebird.promisifyAll(kbyte.Client.prototype);
 const client = new kbyte.Client('wss://byteball.org/bb');
 
-const repeatString = (str, times) => (
-  str.repeat ? str.repeat(times) : (new Array(times + 1)).join(str)
-);
+const repeatString = (str, times) =>
+  str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
-const compose = async (app, payload, { address, privKeyBuf, definition }, cb) => {
+const compose = async (app, payload, { address, privKeyBuf, definition }) => {
   const objMessage = { app };
   objMessage.payload_hash = objectHash.getBase64Hash(payload);
   objMessage.payload_location = 'inline';
   objMessage.payload = payload;
 
   const witnesses = await client.requestAsync('get_witnesses', null);
-  const lightProps = await client.requestAsync('light/get_parents_and_last_ball_and_witness_list_unit', { witnesses });
+  const lightProps = await client.requestAsync(
+    'light/get_parents_and_last_ball_and_witness_list_unit',
+    { witnesses },
+  );
 
   const targetAmount = 1000;
   const coinsForAmount = await client.requestAsync('light/pick_divisible_coins_for_amount', {
@@ -59,8 +61,11 @@ const compose = async (app, payload, { address, privKeyBuf, definition }, cb) =>
   const assocLengthsBySigningPaths = { r: 88 };
   const arrSigningPaths = Object.keys(assocLengthsBySigningPaths);
   assocSigningPaths[address] = arrSigningPaths;
-  for (let j = 0; j < arrSigningPaths.length; j++) {
-    objAuthor.authentifiers[arrSigningPaths[j]] = repeatString('-', assocLengthsBySigningPaths[arrSigningPaths[j]]);
+  for (let j = 0; j < arrSigningPaths.length; j += 1) {
+    objAuthor.authentifiers[arrSigningPaths[j]] = repeatString(
+      '-',
+      assocLengthsBySigningPaths[arrSigningPaths[j]],
+    );
   }
   objUnit.authors.push(objAuthor);
 
@@ -85,7 +90,13 @@ const compose = async (app, payload, { address, privKeyBuf, definition }, cb) =>
   objUnit.messages = [objMessage, objPaymentMessage];
   objUnit.unit = objectHash.getUnitHash(objUnit);
 
-  console.log('Unit', objUnit.unit, objUnit.authors[0].authentifiers.r, objUnit.headers_commission, objUnit.payload_commission);
+  console.log(
+    'Unit',
+    objUnit.unit,
+    objUnit.authors[0].authentifiers.r,
+    objUnit.headers_commission,
+    objUnit.payload_commission,
+  );
   console.log(JSON.stringify(objUnit));
   console.log(`https://explorer.byteball.org/#${objUnit.unit}`);
 
@@ -111,6 +122,11 @@ const address = objectHash.getChash160(definition);
 console.log('Address', address);
 /** Unsafe end */
 
-compose('data', { test: 'Hello world!' }, { privKeyBuf, address, definition }, (err, result) => {
-  console.log('Compose', err, result);
-});
+compose(
+  'data',
+  { test: 'Hello world!' },
+  { privKeyBuf, address, definition },
+  (err, result) => {
+    console.log('Compose', err, result);
+  },
+);
