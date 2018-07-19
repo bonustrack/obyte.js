@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "description": "The JavaScript library for Byteball",
   "main": "lib/byteball.js",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "build": "webpack --env dev && webpack --env build && npm run test",
+    "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
     "test": "mocha --require babel-register --colors ./test/*.spec.js",
     "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js"
@@ -28,7 +30,6 @@
     "chai": "^4.1.2",
     "eslint": "^5.0.1",
     "eslint-config-airbnb-base": "^13.0.0",
-    "eslint-loader": "^2.0.0",
     "eslint-plugin-import": "^2.8.0",
     "jsdom": "11.11.0",
     "jsdom-global": "3.0.2",
