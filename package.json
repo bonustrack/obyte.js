@@ -9,8 +9,7 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha --require babel-register --colors ./test/*.spec.js",
-    "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js"
+    "test": "jest"
   },
   "license": "MIT",
   "dependencies": {
@@ -27,13 +26,10 @@
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^7.0.0-beta.3",
     "babel-register": "^7.0.0-beta.3",
-    "chai": "^4.1.2",
     "eslint": "^5.0.1",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.8.0",
-    "jsdom": "11.11.0",
-    "jsdom-global": "3.0.2",
-    "mocha": "^4.0.1",
+    "jest": "^23.4.1",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8",
