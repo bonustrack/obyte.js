@@ -15,6 +15,9 @@ jobs:
           name: Install packages
           command: npm install
       - run:
+          name: Build library
+          command: npm run build
+      - run:
           name: lint
           command: npm run lint
       - run:
