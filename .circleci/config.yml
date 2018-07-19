@@ -26,12 +26,6 @@ jobs:
       - run:
           name: test
           command: npm run test
-      - run:
-          name: coverage
-          command: npm run test:coverage
-      - store_artifacts:
-          path: coverage
-          prefix: coverage
       - save_cache:
           name: Save node_modules cache
           key: dependency-cache-{{ checksum "package-lock.json" }}
