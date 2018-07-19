@@ -10,4 +10,4 @@ const generateRandomSeed = () => {
 
 const isSeedValid = seed => Mnemonic.isValid(seed);
 
-export { generateRandomSeed, isSeedValid };
+export default { generateRandomSeed, isSeedValid };
