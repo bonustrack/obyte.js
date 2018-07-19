@@ -1,13 +1,19 @@
 import kbyte from 'kbyte';
-import bluebird from 'bluebird';
 import Mnemonic from 'bitcore-mnemonic';
 import objectLength from 'byteballcore/object_length';
 import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import ecdsaSig from 'byteballcore/signature';
 
-bluebird.promisifyAll(kbyte.Client.prototype);
 const client = new kbyte.Client('wss://byteball.org/bb');
+
+client.requestAsync = (command, params) =>
+  new Promise((resolve, reject) => {
+    client.send(command, params, (err, result) => {
+      if (err !== null) return reject(err);
+      return resolve(result);
+    });
+  });
 
 const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
