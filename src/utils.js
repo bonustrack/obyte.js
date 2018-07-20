@@ -8,6 +8,11 @@ const generateRandomSeed = () => {
   return mnemonic.phrase;
 };
 
-const isSeedValid = seed => Mnemonic.isValid(seed);
+function isSeedValid(seed) {
+  // isValid will throw if one of those is not satisfied.
+  if (typeof seed !== 'string' || seed.split(' ').length !== 12) return false;
 
-export { generateRandomSeed, isSeedValid };
+  return Mnemonic.isValid(seed);
+}
+
+export default { generateRandomSeed, isSeedValid };

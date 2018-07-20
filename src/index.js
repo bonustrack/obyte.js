@@ -1,9 +1,7 @@
 import Client from './client';
 import utils from './utils';
-// import compose from './compose';
 
-export {
+export default {
   Client,
   utils,
-  // compose,
 };
