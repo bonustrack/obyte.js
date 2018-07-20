@@ -4,7 +4,7 @@ describe('Client', () => {
   let client = null;
 
   beforeAll(() => {
-    client = new Client('wss://byteball.fr/bb');
+    client = new Client('wss://byteball.org/bb');
   });
 
   it('should create client', () => {
