@@ -1,4 +1,4 @@
-import { Client } from '../lib/byteball';
+import { Client } from '..';
 
 describe('Client', () => {
   let client = null;

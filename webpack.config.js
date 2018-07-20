@@ -1,22 +1,20 @@
-/* global __dirname, require, module */
 const path = require('path');
-const { env } = require('yargs').argv;
 const pkg = require('./package.json');
 
 const libraryName = pkg.name;
 
-const outputFile = env === 'build' ? `${libraryName}.min.js` : `${libraryName}.js`;
-
 const config = {
-  mode: env === 'build' ? 'production' : 'development',
+  mode: 'production',
   entry: path.resolve(__dirname, './src/index.js'),
-  devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, './lib'),
-    filename: outputFile,
+    path: path.resolve(__dirname, './dist'),
+    filename: `${libraryName}.min.js`,
     library: libraryName,
     libraryTarget: 'umd',
     umdNamedDefine: true,
+  },
+  node: {
+    fs: 'empty',
   },
   module: {
     rules: [
