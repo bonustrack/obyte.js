@@ -17,8 +17,7 @@
   "dependencies": {
     "bitcore-mnemonic": "^1.5.0",
     "byteballcore": "^0.2.90",
-    "kbyte": "0.0.2",
-    "lodash.camelcase": "^4.3.0"
+    "kbyte": "0.0.3"
   },
   "devDependencies": {
     "@taskr/babel": "^1.1.0",
@@ -27,7 +26,7 @@
     "babel-loader": "^7.1.5",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.7.0",
-    "eslint": "^5.0.1",
+    "eslint": "^5.2.0",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.8.0",

@@ -1,5 +1,5 @@
 import { Client as KbyteClient } from 'kbyte';
-import camelCase from 'lodash.camelcase';
+import { camelCase } from './internal';
 import api from './api.json';
 
 export default class Client {

@@ -18,4 +18,16 @@ describe('Client', () => {
   it('should support promises', done => {
     client.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(() => done());
   });
+
+  it('should support callbacks with empty params', done => {
+    client.getBots(() => done());
+  });
+
+  it('should support promises with empty params', done => {
+    client.getBots().then(() => done());
+  });
+
+  it('should catch error with promises', done => {
+    client.getParentsAndLastBallAndWitnessListUnit().catch(() => done());
+  });
 });
