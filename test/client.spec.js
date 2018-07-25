@@ -26,4 +26,8 @@ describe('Client', () => {
   it('should support promises with empty params', done => {
     client.getBots().then(() => done());
   });
+
+  it('should catch error with promises', done => {
+    client.getParentsAndLastBallAndWitnessListUnit().catch(() => done());
+  });
 });
