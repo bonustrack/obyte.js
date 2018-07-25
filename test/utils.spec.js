@@ -9,9 +9,7 @@ describe('utils', () => {
         'neck pond powder rude refuse vehicle broken security wish meadow dilemma glare',
       ];
 
-      for (let seed of seeds) {
-        expect(utils.isSeedValid(seed)).toBe(true);
-      }
+      seeds.forEach(seed => expect(utils.isSeedValid(seed)).toBe(true));
     });
 
     it('should return false for invalid seeds', () => {
@@ -23,9 +21,7 @@ describe('utils', () => {
         'neck pond neck rude refuse vehicle broken security wish meadow dilemma glare',
       ];
 
-      for (let seed of seeds) {
-        expect(utils.isSeedValid(seed)).toBe(false);
-      }
+      seeds.forEach(seed => expect(utils.isSeedValid(seed)).toBe(false));
     });
   });
 
