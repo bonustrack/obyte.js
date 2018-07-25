@@ -30,4 +30,43 @@ describe('Client', () => {
   it('should catch error with promises', done => {
     client.getParentsAndLastBallAndWitnessListUnit().catch(() => done());
   });
+
+  describe('composition helpers', () => {
+    const auth = {
+      address: 'hello',
+      privKeyBuf: Buffer.from('test', 'utf-8'),
+    };
+
+    it('should compose compose.text', () => {
+      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce();
+
+      client.compose.text('hey', auth);
+
+      expect(spy).toHaveBeenCalledWith('text', 'hey', auth);
+    });
+
+    it('should compose compose.data', () => {
+      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce();
+
+      client.compose.data({ hello: 'World' }, auth);
+
+      expect(spy).toHaveBeenCalledWith('data', { hello: 'World' }, auth);
+    });
+
+    it('should compose post.text', () => {
+      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce();
+
+      client.post.text('hey', auth);
+
+      expect(spy).toHaveBeenCalledWith('text', 'hey', auth);
+    });
+
+    it('should compose post.data', () => {
+      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce();
+
+      client.post.data({ hello: 'World' }, auth);
+
+      expect(spy).toHaveBeenCalledWith('data', { hello: 'World' }, auth);
+    });
+  });
 });
