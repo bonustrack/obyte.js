@@ -113,11 +113,11 @@ export default class Client {
       },
 
       async text(...args) {
-        this.message('text', ...args);
+        return this.message('text', ...args);
       },
 
       async data(...args) {
-        this.message('data', ...args);
+        return this.message('data', ...args);
       },
     };
 
@@ -128,11 +128,11 @@ export default class Client {
       },
 
       async text(...args) {
-        this.message('text', ...args);
+        return this.message('text', ...args);
       },
 
       async data(...args) {
-        this.message('data', ...args);
+        return this.message('data', ...args);
       },
     };
   }

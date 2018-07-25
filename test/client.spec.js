@@ -38,7 +38,7 @@ describe('Client', () => {
     };
 
     it('should compose compose.text', () => {
-      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce();
+      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce(() => {});
 
       client.compose.text('hey', auth);
 
@@ -46,7 +46,7 @@ describe('Client', () => {
     });
 
     it('should compose compose.data', () => {
-      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce();
+      const spy = jest.spyOn(client.compose, 'message').mockImplementationOnce(() => {});
 
       client.compose.data({ hello: 'World' }, auth);
 
@@ -54,7 +54,7 @@ describe('Client', () => {
     });
 
     it('should compose post.text', () => {
-      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce();
+      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce(() => {});
 
       client.post.text('hey', auth);
 
@@ -62,7 +62,7 @@ describe('Client', () => {
     });
 
     it('should compose post.data', () => {
-      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce();
+      const spy = jest.spyOn(client.post, 'message').mockImplementationOnce(() => {});
 
       client.post.data({ hello: 'World' }, auth);
 
