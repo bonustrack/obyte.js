@@ -33,7 +33,7 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, auth) {
-        const { address, privKeyBuf } = auth;
+        const { address, privKeyBuf, definition } = auth;
 
         const message = {
           app,
@@ -43,7 +43,21 @@ export default class Client {
         };
 
         const witnesses = await that.getWitnesses();
-        const lightProps = await that.getParentsAndLastBallAndWitnessListUnit({ witnesses });
+
+        const [lightProps, history] = await Promise.all([
+          that.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          that.getHistory({ witnesses, addresses: [address] }),
+        ]);
+
+        let requireDefinition = true;
+        const joints = history.joints.concat(history.unstable_mc_joints);
+        joints.forEach(joint => {
+          joint.unit.authors.forEach(author => {
+            if (author.address === address && author.definition) {
+              requireDefinition = false;
+            }
+          });
+        });
 
         const targetAmount = 1000;
         const coinsForAmount = await that.pickDivisibleCoinsForAmount({
@@ -79,6 +93,10 @@ export default class Client {
         };
 
         let author = { address, authentifiers: {} };
+        if (requireDefinition) {
+          author.definition = definition;
+        }
+
         const assocSigningPaths = {};
         const assocLengthsBySigningPaths = { r: 88 };
         const arrSigningPaths = Object.keys(assocLengthsBySigningPaths);

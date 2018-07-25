@@ -35,6 +35,7 @@ describe('Client', () => {
     const auth = {
       address: 'hello',
       privKeyBuf: Buffer.from('test', 'utf-8'),
+      definition: 'hello',
     };
 
     it('should compose compose.text', () => {
