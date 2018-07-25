@@ -45,14 +45,14 @@ export default class Client {
     const targetAmount = 1000;
     const coinsForAmount = await this.pickDivisibleCoinsForAmount({
       addresses: [address],
-      last_ball_mci: 1000000000,
+      last_ball_mci: lightProps.last_stable_mc_ball_mci,
       amount: targetAmount,
       spend_unconfirmed: 'own',
     });
-    const inputs = coinsForAmount.inputs_with_proofs.map(input => input.input);
-    const amount = coinsForAmount.total_amount;
 
-    const paymentPayload = { inputs, outputs: [{ address, amount: 0 }] };
+    const inputs = coinsForAmount.inputs_with_proofs.map(input => input.input);
+
+    const paymentPayload = { inputs, outputs: [{ address, amount: coinsForAmount.total_amount }] };
 
     const paymentMessage = {
       app: 'payment',
@@ -88,7 +88,7 @@ export default class Client {
     const headersCommission = objectLength.getHeadersSize(unit);
     const payloadCommission = objectLength.getTotalPayloadSize(unit);
 
-    paymentMessage.payload.outputs[0].amount = amount - headersCommission - payloadCommission;
+    paymentMessage.payload.outputs[0].amount -= headersCommission + payloadCommission;
     paymentMessage.payload_hash = objectHash.getBase64Hash(paymentMessage.payload);
 
     unit.headers_commission = headersCommission;
@@ -104,5 +104,19 @@ export default class Client {
     unit.unit = objectHash.getUnitHash(unit);
 
     return unit;
+  }
+
+  async broadcast(unit) {
+    await this.postJoint({ unit });
+    return unit.unit;
+  }
+
+  async post(app, payload, auth) {
+    const unit = await this.compose(
+      app,
+      payload,
+      auth,
+    );
+    return this.broadcast(unit);
   }
 }
