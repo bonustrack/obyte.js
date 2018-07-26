@@ -5,6 +5,7 @@ import objectLength from 'byteballcore/object_length';
 import ecdsaSig from 'byteballcore/signature';
 import { repeatString, mapAPI } from './internal';
 import api from './api.json';
+import apps from './apps.json';
 
 export default class Client {
   constructor(nodeAddress) {
@@ -120,14 +121,6 @@ export default class Client {
 
         return unit;
       },
-
-      async text(...args) {
-        return this.message('text', ...args);
-      },
-
-      async data(...args) {
-        return this.message('data', ...args);
-      },
     };
 
     this.post = {
@@ -135,15 +128,10 @@ export default class Client {
         const unit = await that.compose.message(app, payload, auth);
         return that.broadcast(unit);
       },
-
-      async text(...args) {
-        return this.message('text', ...args);
-      },
-
-      async data(...args) {
-        return this.message('data', ...args);
-      },
     };
+
+    Object.assign(this.compose, mapAPI(apps, this.compose.message));
+    Object.assign(this.post, mapAPI(apps, this.post.message));
   }
 
   async broadcast(unit) {
