@@ -9,7 +9,7 @@ import apps from './apps.json';
 
 export default class Client {
   constructor(nodeAddress) {
-    const that = this;
+    const self = this;
 
     this.client = new KbyteClient(nodeAddress);
 
@@ -34,11 +34,11 @@ export default class Client {
           payload,
         };
 
-        const witnesses = await that.getWitnesses();
+        const witnesses = await self.getWitnesses();
 
         const [lightProps, history] = await Promise.all([
-          that.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          that.getHistory({ witnesses, addresses: [address] }),
+          self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          self.getHistory({ witnesses, addresses: [address] }),
         ]);
 
         let requireDefinition = true;
@@ -52,7 +52,7 @@ export default class Client {
         });
 
         const targetAmount = 1000;
-        const coinsForAmount = await that.pickDivisibleCoinsForAmount({
+        const coinsForAmount = await self.pickDivisibleCoinsForAmount({
           addresses: [address],
           last_ball_mci: lightProps.last_stable_mc_ball_mci,
           amount: targetAmount,
@@ -125,8 +125,8 @@ export default class Client {
 
     this.post = {
       async message(app, payload, auth) {
-        const unit = await that.compose.message(app, payload, auth);
-        return that.broadcast(unit);
+        const unit = await self.compose.message(app, payload, auth);
+        return self.broadcast(unit);
       },
     };
 
