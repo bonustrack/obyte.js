@@ -14,12 +14,16 @@ export const mapAPI = (api, impl) =>
   Object.keys(api).reduce(
     (prev, name) => ({
       ...prev,
-      [camelCase(name)]: (params, cb) => {
-        if (!api[name].params && typeof params === 'function') {
-          cb = params; // eslint-disable-line no-param-reassign
+      [camelCase(name)]: (...params) => {
+        let cb = params.length !== 0 ? params[params.length - 1] : null;
+
+        if (typeof cb === 'function') {
+          params = params.slice(0, -1); // eslint-disable-line no-param-reassign
+        } else {
+          cb = null;
         }
 
-        const promise = impl(name, api[name].params ? params : null);
+        const promise = impl(name, ...params);
 
         if (!cb) return promise;
         return promise.then(result => cb(null, result)).catch(err => cb(err, null));

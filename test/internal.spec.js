@@ -33,14 +33,23 @@ describe('internal', () => {
       },
     };
 
-    const mappedAPI = mapAPI(api, (name, params) => mock(name, params));
+    const mappedAPI = mapAPI(api, mock);
 
     mappedAPI.getWitnesses();
-    expect(mock).toHaveBeenCalledWith('get_witnesses', null);
+    expect(mock).toHaveBeenCalledWith('get_witnesses');
 
     mock.mockClear();
 
     mappedAPI.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=');
     expect(mock).toHaveBeenCalledWith('get_joint', 'oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=');
+
+    mock.mockClear();
+
+    mappedAPI.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=', 'auth');
+    expect(mock).toHaveBeenCalledWith(
+      'get_joint',
+      'oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=',
+      'auth',
+    );
   });
 });
