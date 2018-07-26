@@ -3,7 +3,7 @@ import { camelCase } from './internal';
 import api from './api.json';
 
 export default class Client {
-  constructor(address) {
+  constructor(address = 'wss://byteball.org/bb') {
     this.client = new KbyteClient(address);
     Object.keys(api).forEach(name => {
       this[camelCase(name)] = (params, cb) => {
