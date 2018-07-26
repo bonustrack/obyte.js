@@ -3,7 +3,7 @@ import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
 import ecdsaSig from 'byteballcore/signature';
-import { camelCase, repeatString } from './internal';
+import { repeatString, mapAPI } from './internal';
 import api from './api.json';
 
 export default class Client {
@@ -12,24 +12,15 @@ export default class Client {
 
     this.client = new KbyteClient(nodeAddress);
 
-    Object.keys(api).forEach(name => {
-      this[camelCase(name)] = (params, cb) => {
-        if (!api[name].params && typeof params === 'function') {
-          cb = params; // eslint-disable-line no-param-reassign
-        }
-        const promise = new Promise((resolve, reject) => {
-          this.client.request(name, api[name].params ? params : null, (err, result) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(result);
-            }
-          });
+    const requestAsync = (name, params) =>
+      new Promise((resolve, reject) => {
+        this.client.request(name, params, (err, result) => {
+          if (err) return reject(err);
+          return resolve(result);
         });
-        if (!cb) return promise;
-        return promise.then(result => cb(null, result)).catch(err => cb(err, null));
-      };
-    });
+      });
+
+    Object.assign(this, mapAPI(api, requestAsync));
 
     this.compose = {
       async message(app, payload, auth) {

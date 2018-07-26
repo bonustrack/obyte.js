@@ -1,4 +1,4 @@
-import { camelCase, repeatString } from '../src/internal';
+import { camelCase, repeatString, mapAPI } from '../src/internal';
 
 describe('internal', () => {
   describe('camelCase', () => {
@@ -21,5 +21,26 @@ describe('internal', () => {
 
       expect(repeatString(5, 2)).toEqual('55');
     });
+  });
+
+  describe('should map API', () => {
+    const mock = jest.fn().mockReturnValue(Promise.resolve());
+
+    const api = {
+      get_witnesses: {},
+      get_joint: {
+        params: 'string',
+      },
+    };
+
+    const mappedAPI = mapAPI(api, (name, params) => mock(name, params));
+
+    mappedAPI.getWitnesses();
+    expect(mock).toHaveBeenCalledWith('get_witnesses', null);
+
+    mock.mockClear();
+
+    mappedAPI.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=');
+    expect(mock).toHaveBeenCalledWith('get_joint', 'oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=');
   });
 });
