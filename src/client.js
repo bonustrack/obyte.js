@@ -1,9 +1,9 @@
-import { Client as KbyteClient } from 'kbyte';
 import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
 import ecdsaSig from 'byteballcore/signature';
 import { repeatString, sortOutputs, mapAPI } from './internal';
+import WSClient from './wsclient';
 import { DEFAULT_NODE } from './constants';
 import api from './api.json';
 import apps from './apps.json';
@@ -12,7 +12,8 @@ export default class Client {
   constructor(nodeAddress = DEFAULT_NODE) {
     const self = this;
 
-    this.client = new KbyteClient(nodeAddress);
+    this.client = new WSClient(nodeAddress);
+    this.cachedWitnesses = null;
 
     const requestAsync = (name, params) =>
       new Promise((resolve, reject) => {
@@ -44,7 +45,7 @@ export default class Client {
           });
         }
 
-        const witnesses = await self.getWitnesses();
+        const witnesses = await self.getCachedWitnesses();
 
         const [lightProps, history] = await Promise.all([
           self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
@@ -150,5 +151,12 @@ export default class Client {
   async broadcast(unit) {
     await this.postJoint({ unit });
     return unit.unit;
+  }
+
+  async getCachedWitnesses() {
+    if (this.cachedWitnesses) return this.cachedWitnesses;
+
+    this.cachedWitnesses = await this.getWitnesses();
+    return this.cachedWitnesses;
   }
 }
