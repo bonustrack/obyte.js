@@ -1,8 +1,8 @@
-import { Client as KbyteClient } from 'kbyte';
 import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
 import ecdsaSig from 'byteballcore/signature';
+import WSClient from './wsclient';
 import { repeatString, mapAPI } from './internal';
 import { DEFAULT_NODE } from './constants';
 import api from './api.json';
@@ -12,7 +12,7 @@ export default class Client {
   constructor(nodeAddress = DEFAULT_NODE) {
     const self = this;
 
-    this.client = new KbyteClient(nodeAddress);
+    this.client = new WSClient(nodeAddress);
     this.cachedWitnesses = null;
 
     const requestAsync = (name, params) =>
