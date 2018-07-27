@@ -4,11 +4,12 @@ import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
 import ecdsaSig from 'byteballcore/signature';
 import { repeatString, mapAPI } from './internal';
+import { DEFAULT_NODE } from './constants';
 import api from './api.json';
 import apps from './apps.json';
 
 export default class Client {
-  constructor(nodeAddress = 'wss://byteball.org/bb') {
+  constructor(nodeAddress = DEFAULT_NODE) {
     const self = this;
 
     this.client = new KbyteClient(nodeAddress);
