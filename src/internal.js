@@ -10,6 +10,11 @@ export const camelCase = input =>
 export const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
+export function sortOutputs(a, b) {
+  const localeCompare = a.address.localeCompare(b.address);
+  return localeCompare || a.amount - b.amount;
+}
+
 export const mapAPI = (api, impl) =>
   Object.keys(api).reduce(
     (prev, name) => ({
