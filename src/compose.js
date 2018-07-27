@@ -1,11 +1,11 @@
-import kbyte from 'kbyte';
 import Mnemonic from 'bitcore-mnemonic';
 import objectLength from 'byteballcore/object_length';
 import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import ecdsaSig from 'byteballcore/signature';
+import WSClient from './wsclient';
 
-const client = new kbyte.Client('wss://byteball.org/bb');
+const client = new WSClient.Client('wss://byteball.org/bb');
 
 client.requestAsync = (command, params) =>
   new Promise((resolve, reject) => {
