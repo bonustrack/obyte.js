@@ -13,6 +13,7 @@ export default class Client {
     const self = this;
 
     this.client = new WSClient(nodeAddress);
+    this.cachedWitnesses = null;
 
     const requestAsync = (name, params) =>
       new Promise((resolve, reject) => {
@@ -35,7 +36,7 @@ export default class Client {
           payload,
         };
 
-        const witnesses = await self.getWitnesses();
+        const witnesses = await self.getCachedWitnesses();
 
         const [lightProps, history] = await Promise.all([
           self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
@@ -138,5 +139,12 @@ export default class Client {
   async broadcast(unit) {
     await this.postJoint({ unit });
     return unit.unit;
+  }
+
+  async getCachedWitnesses() {
+    if (this.cachedWitnesses) return this.cachedWitnesses;
+
+    this.cachedWitnesses = await this.getWitnesses();
+    return this.cachedWitnesses;
   }
 }
