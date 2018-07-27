@@ -33,6 +33,7 @@ declare namespace Byteball {
       profile(params: any): Promise<object>;
       text(params: any): Promise<object>;
       vote(params: any): Promise<object>;
+      payment(params: any): Promise<object>;
     };
 
     post: {
@@ -44,6 +45,7 @@ declare namespace Byteball {
       profile(params: any): Promise<string>;
       text(params: any): Promise<string>;
       vote(params: any): Promise<string>;
+      payment(params: any): Promise<string>;
     };
   }
 
