@@ -5,7 +5,7 @@ import constants from 'byteballcore/constants';
 import ecdsaSig from 'byteballcore/signature';
 import WSClient from './wsclient';
 
-const client = new WSClient.Client('wss://byteball.org/bb');
+const client = new WSClient('wss://byteball.org/bb');
 
 client.requestAsync = (command, params) =>
   new Promise((resolve, reject) => {
