@@ -27,9 +27,7 @@ export function requiresDefinition(address, history) {
   return requireDefinition;
 }
 
-export async function createPaymentMessage(client, lightProps, asset, outputs, auth) {
-  const { address } = auth;
-
+export async function createPaymentMessage(client, lightProps, asset, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
   const targetAmount = asset ? amount : 1000 + amount;

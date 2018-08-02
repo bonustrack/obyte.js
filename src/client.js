@@ -53,7 +53,7 @@ export default class Client {
             lightProps,
             null,
             payload.asset ? [] : payload.outputs,
-            auth,
+            address,
           );
           customMessages.push(bbPayment);
 
@@ -63,7 +63,7 @@ export default class Client {
               lightProps,
               payload.asset,
               payload.outputs,
-              auth,
+              address,
             );
             customMessages.push(assetPayment);
           }
