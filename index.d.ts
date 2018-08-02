@@ -6,6 +6,7 @@ declare namespace Byteball {
     constructor(nodeAddress?: string);
 
     broadcast(unit: object): Promise<string>;
+    close(): void;
 
     // Auto-generated methods
     getWitnesses(params: any): any;

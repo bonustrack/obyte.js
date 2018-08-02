@@ -159,4 +159,8 @@ export default class Client {
     this.cachedWitnesses = await this.getWitnesses();
     return this.cachedWitnesses;
   }
+
+  close() {
+    this.client.close();
+  }
 }
