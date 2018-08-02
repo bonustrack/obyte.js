@@ -2,7 +2,7 @@ import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
 import WSClient from './wsclient';
-import { repeatString, mapAPI, sign, toPublicKey } from './internal';
+import { repeatString, sortOutputs, mapAPI, sign, toPublicKey } from './internal';
 import { DEFAULT_NODE } from './constants';
 import api from './api.json';
 import apps from './apps.json';
@@ -30,12 +30,21 @@ export default class Client {
         const definition = ['sig', { pubkey }];
         const address = objectHash.getChash160(definition);
 
-        const message = {
-          app,
-          payload_hash: objectHash.getBase64Hash(payload),
-          payload_location: 'inline',
-          payload,
-        };
+        let paymentAmount = 0;
+        const customOutputs = [];
+        const customMessages = [];
+
+        if (app === 'payment') {
+          paymentAmount = payload.outputs.reduce((a, b) => a + b.amount, 0);
+          customOutputs.push(...payload.outputs);
+        } else {
+          customMessages.push({
+            app,
+            payload_hash: objectHash.getBase64Hash(payload),
+            payload_location: 'inline',
+            payload,
+          });
+        }
 
         const witnesses = await self.getCachedWitnesses();
 
@@ -54,7 +63,7 @@ export default class Client {
           });
         });
 
-        const targetAmount = 1000;
+        const targetAmount = 1000 + paymentAmount;
         const coinsForAmount = await self.pickDivisibleCoinsForAmount({
           addresses: [address],
           last_ball_mci: lightProps.last_stable_mc_ball_mci,
@@ -66,7 +75,7 @@ export default class Client {
 
         const paymentPayload = {
           inputs,
-          outputs: [{ address, amount: coinsForAmount.total_amount }],
+          outputs: [{ address, amount: coinsForAmount.total_amount }, ...customOutputs],
         };
 
         const paymentMessage = {
@@ -79,7 +88,7 @@ export default class Client {
         const unit = {
           version: constants.version,
           alt: constants.alt,
-          messages: [message, paymentMessage],
+          messages: [...customMessages, paymentMessage],
           authors: [],
           parent_units: lightProps.parent_units,
           last_ball: lightProps.last_stable_mc_ball,
@@ -107,7 +116,10 @@ export default class Client {
         const headersCommission = objectLength.getHeadersSize(unit);
         const payloadCommission = objectLength.getTotalPayloadSize(unit);
 
-        paymentMessage.payload.outputs[0].amount -= headersCommission + payloadCommission;
+        paymentMessage.payload.outputs[0].amount -=
+          headersCommission + payloadCommission + paymentAmount;
+        paymentMessage.payload.outputs.sort(sortOutputs);
+
         paymentMessage.payload_hash = objectHash.getBase64Hash(paymentMessage.payload);
 
         unit.headers_commission = headersCommission;
@@ -119,7 +131,7 @@ export default class Client {
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
-        unit.messages = [message, paymentMessage];
+        unit.messages = [...customMessages, paymentMessage];
         unit.unit = objectHash.getUnitHash(unit);
 
         return unit;

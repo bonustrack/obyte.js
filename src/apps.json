@@ -28,5 +28,10 @@
       "unit": "string",
       "choice": "string"
     }
+  },
+  "payment": {
+    "params": {
+      "outputs": "array"
+    }
   }
 }
