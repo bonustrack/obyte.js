@@ -44,7 +44,4 @@ export const sign = (hash, privKey) => {
   return res.signature.toString('base64');
 };
 
-export const toPublicKey = (privKey) => {
-  return ecdsa.publicKeyCreate(privKey).toString('base64');
-};
-
+export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');
