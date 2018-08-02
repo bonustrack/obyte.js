@@ -45,18 +45,16 @@ export default class Client {
           self.getHistory({ witnesses, addresses: [address] }),
         ]);
 
-        const customMessages = [];
+        const bytePayment = await createPaymentMessage(
+          self,
+          lightProps,
+          null,
+          app !== 'payment' || payload.asset ? [] : payload.outputs,
+          address,
+        );
+        const customMessages = [bytePayment];
 
         if (app === 'payment') {
-          const bbPayment = await createPaymentMessage(
-            self,
-            lightProps,
-            null,
-            payload.asset ? [] : payload.outputs,
-            address,
-          );
-          customMessages.push(bbPayment);
-
           if (payload.asset) {
             const assetPayment = await createPaymentMessage(
               self,
