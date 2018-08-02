@@ -1,8 +1,36 @@
 {
+  "address_definition_change": {
+    "params": {
+      "definition_chash": "string",
+      "address": "string"
+    }
+  },
   "attestation": {
     "params": {
       "address": "string",
       "profile": "object"
+    }
+  },
+  "asset": {
+    "params": {
+      "cap": "number",
+      "is_private": "boolean",
+      "is_transferrable": "boolean",
+      "auto_destroy": "boolean",
+      "fixed_denominations": "boolean",
+      "issued_by_definer_only": "boolean",
+      "cosigned_by_definer": "boolean",
+      "spender_attested": "boolean",
+      "issue_condition": "array",
+      "transfer_condition": "array",
+      "attestors": "array",
+      "denominations": "array"
+    }
+  },
+  "asset_attestors": {
+    "params": {
+      "asset": "string",
+      "attestors": "array"
     }
   },
   "data": {
@@ -10,6 +38,9 @@
   },
   "data_feed": {
     "params": "object"
+  },
+  "definition_template": {
+    "params": "array"
   },
   "poll": {
     "params": {

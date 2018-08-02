@@ -26,9 +26,13 @@ declare namespace Byteball {
 
     compose: {
       message(app, payload, auth): Promise<object>;
+      addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<object>;
+      asset(params: any): Promise<object>;
+      assetAttestors(params: any): Promise<object>;
       data(params: any): Promise<object>;
       dataFeed(params: any): Promise<object>;
+      definitionTemplate(params: any): Promise<string>;
       poll(params: any): Promise<object>;
       profile(params: any): Promise<object>;
       text(params: any): Promise<object>;
@@ -38,9 +42,13 @@ declare namespace Byteball {
 
     post: {
       message(app, payload, auth): Promise<string>;
+      addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<string>;
+      asset(params: any): Promise<object>;
+      assetAttestors(params: any): Promise<object>;
       data(params: any): Promise<string>;
       dataFeed(params: any): Promise<string>;
+      definitionTemplate(params: any): Promise<string>;
       poll(params: any): Promise<string>;
       profile(params: any): Promise<string>;
       text(params: any): Promise<string>;

@@ -1,3 +1,5 @@
+import ecdsa from 'secp256k1';
+
 export const camelCase = input =>
   input
     .split('/')
@@ -86,3 +88,10 @@ export const mapAPI = (api, impl) =>
     }),
     {},
   );
+
+export const sign = (hash, privKey) => {
+  const res = ecdsa.sign(hash, privKey);
+  return res.signature.toString('base64');
+};
+
+export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');

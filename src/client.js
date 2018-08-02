@@ -1,13 +1,14 @@
 import objectHash from 'byteballcore/object_hash';
 import constants from 'byteballcore/constants';
 import objectLength from 'byteballcore/object_length';
-import ecdsaSig from 'byteballcore/signature';
 import {
   repeatString,
   requiresDefinition,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
+  sign,
+  toPublicKey,
 } from './internal';
 import WSClient from './wsclient';
 import { DEFAULT_NODE } from './constants';
@@ -32,8 +33,10 @@ export default class Client {
     Object.assign(this, mapAPI(api, requestAsync));
 
     this.compose = {
-      async message(app, payload, auth) {
-        const { address, privKeyBuf, definition } = auth;
+      async message(app, payload, privKeyBuf) {
+        const pubkey = toPublicKey(privKeyBuf);
+        const definition = ['sig', { pubkey }];
+        const address = objectHash.getChash160(definition);
 
         const witnesses = await self.getCachedWitnesses();
 
@@ -120,7 +123,7 @@ export default class Client {
         unit.timestamp = Math.round(Date.now() / 1000);
 
         const textToSign = objectHash.getUnitHashToSign(unit);
-        const signature = ecdsaSig.sign(textToSign, privKeyBuf);
+        const signature = sign(textToSign, privKeyBuf);
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
@@ -132,8 +135,8 @@ export default class Client {
     };
 
     this.post = {
-      async message(app, payload, auth) {
-        const unit = await self.compose.message(app, payload, auth);
+      async message(app, payload, privKeyBuf) {
+        const unit = await self.compose.message(app, payload, privKeyBuf);
         return self.broadcast(unit);
       },
     };
