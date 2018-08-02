@@ -10,6 +10,56 @@ export const camelCase = input =>
 export const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
+export function requiresDefinition(address, history) {
+  let requireDefinition = true;
+
+  const joints = history.joints.concat(history.unstable_mc_joints);
+  joints.forEach(joint => {
+    joint.unit.authors.forEach(author => {
+      if (author.address === address && author.definition) {
+        requireDefinition = false;
+      }
+    });
+  });
+
+  return requireDefinition;
+}
+
+export async function createPaymentMessage(client, lightProps, asset, outputs, auth) {
+  const { address } = auth;
+
+  const amount = outputs.reduce((a, b) => a + b.amount, 0);
+
+  const targetAmount = asset ? amount : 1000 + amount;
+  const coinsForAmount = await client.pickDivisibleCoinsForAmount({
+    addresses: [address],
+    last_ball_mci: lightProps.last_stable_mc_ball_mci,
+    amount: targetAmount,
+    spend_unconfirmed: 'own',
+    asset,
+  });
+
+  const inputs = coinsForAmount.inputs_with_proofs.map(input => input.input);
+
+  const payload = {
+    inputs,
+    outputs: [{ address, amount: coinsForAmount.total_amount - amount }, ...outputs],
+  };
+
+  if (asset) {
+    payload.asset = asset;
+  }
+
+  const payment = {
+    app: 'payment',
+    payload_hash: '--------------------------------------------',
+    payload_location: 'inline',
+    payload,
+  };
+
+  return payment;
+}
+
 export function sortOutputs(a, b) {
   const localeCompare = a.address.localeCompare(b.address);
   return localeCompare || a.amount - b.amount;

@@ -31,7 +31,8 @@
   },
   "payment": {
     "params": {
-      "outputs": "array"
+      "outputs": "array",
+      "asset": "string"
     }
   }
 }
