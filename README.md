@@ -21,7 +21,7 @@ client.getPeers(function(err, result) {
 
 // Promises
 client.getPeers().then(function(result) {
-  console.log(err, result);
+  console.log(result);
 });
 ```
 
