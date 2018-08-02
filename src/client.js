@@ -1,6 +1,7 @@
-import WSClient from './wsclient';
 import {
   repeatString,
+  requiresDefinition,
+  createPaymentMessage,
   sortOutputs,
   mapAPI,
   sign,
@@ -12,6 +13,7 @@ import {
   getUnitHashToSign,
   getUnitHash,
 } from './internal';
+import WSClient from './wsclient';
 import { DEFAULT_NODE, VERSION, ALT } from './constants';
 import api from './api.json';
 import apps from './apps.json';
@@ -39,13 +41,33 @@ export default class Client {
         const definition = ['sig', { pubkey }];
         const address = getChash160(definition);
 
-        let paymentAmount = 0;
-        const customOutputs = [];
-        const customMessages = [];
+        const witnesses = await self.getCachedWitnesses();
+
+        const [lightProps, history] = await Promise.all([
+          self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          self.getHistory({ witnesses, addresses: [address] }),
+        ]);
+
+        const bytePayment = await createPaymentMessage(
+          self,
+          lightProps,
+          null,
+          app !== 'payment' || payload.asset ? [] : payload.outputs,
+          address,
+        );
+        const customMessages = [bytePayment];
 
         if (app === 'payment') {
-          paymentAmount = payload.outputs.reduce((a, b) => a + b.amount, 0);
-          customOutputs.push(...payload.outputs);
+          if (payload.asset) {
+            const assetPayment = await createPaymentMessage(
+              self,
+              lightProps,
+              payload.asset,
+              payload.outputs,
+              address,
+            );
+            customMessages.push(assetPayment);
+          }
         } else {
           customMessages.push({
             app,
@@ -55,49 +77,12 @@ export default class Client {
           });
         }
 
-        const witnesses = await self.getCachedWitnesses();
-
-        const [lightProps, history] = await Promise.all([
-          self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          self.getHistory({ witnesses, addresses: [address] }),
-        ]);
-
-        let requireDefinition = true;
-        const joints = history.joints.concat(history.unstable_mc_joints);
-        joints.forEach(joint => {
-          joint.unit.authors.forEach(author => {
-            if (author.address === address && author.definition) {
-              requireDefinition = false;
-            }
-          });
-        });
-
-        const targetAmount = 1000 + paymentAmount;
-        const coinsForAmount = await self.pickDivisibleCoinsForAmount({
-          addresses: [address],
-          last_ball_mci: lightProps.last_stable_mc_ball_mci,
-          amount: targetAmount,
-          spend_unconfirmed: 'own',
-        });
-
-        const inputs = coinsForAmount.inputs_with_proofs.map(input => input.input);
-
-        const paymentPayload = {
-          inputs,
-          outputs: [{ address, amount: coinsForAmount.total_amount }, ...customOutputs],
-        };
-
-        const paymentMessage = {
-          app: 'payment',
-          payload_hash: '--------------------------------------------',
-          payload_location: 'inline',
-          payload: paymentPayload,
-        };
+        const requireDefinition = requiresDefinition(address, history);
 
         const unit = {
           version: VERSION,
           alt: ALT,
-          messages: [...customMessages, paymentMessage],
+          messages: [...customMessages],
           authors: [],
           parent_units: lightProps.parent_units,
           last_ball: lightProps.last_stable_mc_ball,
@@ -125,11 +110,14 @@ export default class Client {
         const headersCommission = getHeadersSize(unit);
         const payloadCommission = getTotalPayloadSize(unit);
 
-        paymentMessage.payload.outputs[0].amount -=
-          headersCommission + payloadCommission + paymentAmount;
-        paymentMessage.payload.outputs.sort(sortOutputs);
+        customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
+        customMessages[0].payload.outputs.sort(sortOutputs);
+        customMessages[0].payload_hash = objectHash.getBase64Hash(customMessages[0].payload);
 
-        paymentMessage.payload_hash = getBase64Hash(paymentMessage.payload);
+        if (payload.asset) {
+          customMessages[1].payload.outputs.sort(sortOutputs);
+          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload);
+        }
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
@@ -140,7 +128,7 @@ export default class Client {
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
-        unit.messages = [...customMessages, paymentMessage];
+        unit.messages = [...customMessages];
         unit.unit = getUnitHash(unit);
 
         return unit;
@@ -168,5 +156,9 @@ export default class Client {
 
     this.cachedWitnesses = await this.getWitnesses();
     return this.cachedWitnesses;
+  }
+
+  close() {
+    this.client.close();
   }
 }

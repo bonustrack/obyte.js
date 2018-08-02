@@ -54,6 +54,10 @@ export default class WSClient {
     });
   }
 
+  close() {
+    this.ws.close();
+  }
+
   request(command, params, cb) {
     const request = { command };
     if (params) request.params = params;
