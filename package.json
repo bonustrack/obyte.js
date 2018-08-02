@@ -16,8 +16,9 @@
   "license": "MIT",
   "dependencies": {
     "bitcore-mnemonic": "^1.5.0",
-    "byteballcore": "^0.2.90",
+    "create-hash": "^1.2.0",
     "secp256k1": "^3.5.0",
+    "thirty-two": "^1.0.2",
     "ws": "^6.0.0"
   },
   "devDependencies": {

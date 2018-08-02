@@ -1,9 +1,18 @@
-import objectHash from 'byteballcore/object_hash';
-import constants from 'byteballcore/constants';
-import objectLength from 'byteballcore/object_length';
 import WSClient from './wsclient';
-import { repeatString, sortOutputs, mapAPI, sign, toPublicKey } from './internal';
-import { DEFAULT_NODE } from './constants';
+import {
+  repeatString,
+  sortOutputs,
+  mapAPI,
+  sign,
+  toPublicKey,
+  getHeadersSize,
+  getTotalPayloadSize,
+  getChash160,
+  getBase64Hash,
+  getUnitHashToSign,
+  getUnitHash,
+} from './internal';
+import { DEFAULT_NODE, VERSION, ALT } from './constants';
 import api from './api.json';
 import apps from './apps.json';
 
@@ -28,7 +37,7 @@ export default class Client {
       async message(app, payload, privKeyBuf) {
         const pubkey = toPublicKey(privKeyBuf);
         const definition = ['sig', { pubkey }];
-        const address = objectHash.getChash160(definition);
+        const address = getChash160(definition);
 
         let paymentAmount = 0;
         const customOutputs = [];
@@ -40,7 +49,7 @@ export default class Client {
         } else {
           customMessages.push({
             app,
-            payload_hash: objectHash.getBase64Hash(payload),
+            payload_hash: getBase64Hash(payload),
             payload_location: 'inline',
             payload,
           });
@@ -86,8 +95,8 @@ export default class Client {
         };
 
         const unit = {
-          version: constants.version,
-          alt: constants.alt,
+          version: VERSION,
+          alt: ALT,
           messages: [...customMessages, paymentMessage],
           authors: [],
           parent_units: lightProps.parent_units,
@@ -113,26 +122,26 @@ export default class Client {
         }
         unit.authors.push(author);
 
-        const headersCommission = objectLength.getHeadersSize(unit);
-        const payloadCommission = objectLength.getTotalPayloadSize(unit);
+        const headersCommission = getHeadersSize(unit);
+        const payloadCommission = getTotalPayloadSize(unit);
 
         paymentMessage.payload.outputs[0].amount -=
           headersCommission + payloadCommission + paymentAmount;
         paymentMessage.payload.outputs.sort(sortOutputs);
 
-        paymentMessage.payload_hash = objectHash.getBase64Hash(paymentMessage.payload);
+        paymentMessage.payload_hash = getBase64Hash(paymentMessage.payload);
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
         unit.timestamp = Math.round(Date.now() / 1000);
 
-        const textToSign = objectHash.getUnitHashToSign(unit);
+        const textToSign = getUnitHashToSign(unit);
         const signature = sign(textToSign, privKeyBuf);
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
         unit.messages = [...customMessages, paymentMessage];
-        unit.unit = objectHash.getUnitHash(unit);
+        unit.unit = getUnitHash(unit);
 
         return unit;
       },
