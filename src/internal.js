@@ -35,30 +35,10 @@ export function requiresDefinition(address, history) {
   return requireDefinition;
 }
 
-export function createNakedPaymentMessage(outputs, address) {
+export async function createPaymentMessage(client, lightProps, asset, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  return {
-    app: 'payment',
-    payload_hash: '--------------------------------------------',
-    payload_location: 'inline',
-    payload: {
-      inputs: [
-        {
-          unit: '--------------------------------------------',
-          message_index: 0,
-          output_index: 0,
-        },
-      ],
-      outputs: [{ address, amount }, ...outputs],
-    },
-  };
-}
-
-export async function createPaymentMessage(client, lightProps, asset, fees, outputs, address) {
-  const amount = outputs.reduce((a, b) => a + b.amount, 0);
-
-  const targetAmount = amount + fees;
+  const targetAmount = asset ? amount : 1000 + amount;
   const coinsForAmount = await client.pickDivisibleCoinsForAmount({
     addresses: [address],
     last_ball_mci: lightProps.last_stable_mc_ball_mci,
@@ -71,7 +51,7 @@ export async function createPaymentMessage(client, lightProps, asset, fees, outp
 
   const payload = {
     inputs,
-    outputs: [{ address, amount: coinsForAmount.total_amount - amount - fees }, ...outputs],
+    outputs: [{ address, amount: coinsForAmount.total_amount - amount }, ...outputs],
   };
 
   if (asset) {

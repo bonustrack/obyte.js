@@ -1,7 +1,6 @@
 import {
   repeatString,
   requiresDefinition,
-  createNakedPaymentMessage,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
@@ -49,10 +48,14 @@ export default class Client {
           self.getHistory({ witnesses, addresses: [address] }),
         ]);
 
-        const byteOutputs = app !== 'payment' || payload.asset ? [] : payload.outputs;
-        const nakedPayment = createNakedPaymentMessage(byteOutputs, address);
-
-        const customMessages = [nakedPayment];
+        const bytePayment = await createPaymentMessage(
+          self,
+          lightProps,
+          null,
+          app !== 'payment' || payload.asset ? [] : payload.outputs,
+          address,
+        );
+        const customMessages = [bytePayment];
 
         if (app === 'payment') {
           if (payload.asset) {
@@ -60,7 +63,6 @@ export default class Client {
               self,
               lightProps,
               payload.asset,
-              0,
               payload.outputs,
               address,
             );
@@ -108,14 +110,7 @@ export default class Client {
         const headersCommission = getHeadersSize(unit);
         const payloadCommission = getTotalPayloadSize(unit);
 
-        customMessages[0] = await createPaymentMessage(
-          self,
-          lightProps,
-          null,
-          headersCommission + payloadCommission,
-          byteOutputs,
-          address,
-        );
+        customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
         customMessages[0].payload.outputs.sort(sortOutputs);
         customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload);
 
@@ -124,7 +119,6 @@ export default class Client {
           customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload);
         }
 
-        unit.messages = [...customMessages];
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
 
@@ -133,6 +127,7 @@ export default class Client {
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
+        unit.messages = [...customMessages];
         unit.unit = getUnitHash(unit);
 
         return unit;
