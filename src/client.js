@@ -121,6 +121,7 @@ export default class Client {
           customMessages[1].payload_hash = objectHash.getBase64Hash(customMessages[1].payload);
         }
 
+        unit.messages = [...customMessages];
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
         unit.timestamp = Math.round(Date.now() / 1000);
@@ -130,7 +131,6 @@ export default class Client {
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
-        unit.messages = [...customMessages];
         unit.unit = objectHash.getUnitHash(unit);
 
         return unit;
