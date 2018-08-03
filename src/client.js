@@ -1,6 +1,3 @@
-import objectHash from 'byteballcore/object_hash';
-import constants from 'byteballcore/constants';
-import objectLength from 'byteballcore/object_length';
 import {
   repeatString,
   requiresDefinition,
@@ -9,9 +6,15 @@ import {
   mapAPI,
   sign,
   toPublicKey,
+  getHeadersSize,
+  getTotalPayloadSize,
+  getChash160,
+  getBase64Hash,
+  getUnitHashToSign,
+  getUnitHash,
 } from './internal';
 import WSClient from './wsclient';
-import { DEFAULT_NODE } from './constants';
+import { DEFAULT_NODE, VERSION, ALT } from './constants';
 import api from './api.json';
 import apps from './apps.json';
 
@@ -36,7 +39,7 @@ export default class Client {
       async message(app, payload, privKeyBuf) {
         const pubkey = toPublicKey(privKeyBuf);
         const definition = ['sig', { pubkey }];
-        const address = objectHash.getChash160(definition);
+        const address = getChash160(definition);
 
         const witnesses = await self.getCachedWitnesses();
 
@@ -68,7 +71,7 @@ export default class Client {
         } else {
           customMessages.push({
             app,
-            payload_hash: objectHash.getBase64Hash(payload),
+            payload_hash: getBase64Hash(payload),
             payload_location: 'inline',
             payload,
           });
@@ -77,8 +80,8 @@ export default class Client {
         const requireDefinition = requiresDefinition(address, history);
 
         const unit = {
-          version: constants.version,
-          alt: constants.alt,
+          version: VERSION,
+          alt: ALT,
           messages: [...customMessages],
           authors: [],
           parent_units: lightProps.parent_units,
@@ -104,28 +107,28 @@ export default class Client {
         }
         unit.authors.push(author);
 
-        const headersCommission = objectLength.getHeadersSize(unit);
-        const payloadCommission = objectLength.getTotalPayloadSize(unit);
+        const headersCommission = getHeadersSize(unit);
+        const payloadCommission = getTotalPayloadSize(unit);
 
         customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
         customMessages[0].payload.outputs.sort(sortOutputs);
-        customMessages[0].payload_hash = objectHash.getBase64Hash(customMessages[0].payload);
+        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload);
 
         if (payload.asset) {
           customMessages[1].payload.outputs.sort(sortOutputs);
-          customMessages[1].payload_hash = objectHash.getBase64Hash(customMessages[1].payload);
+          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload);
         }
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
 
-        const textToSign = objectHash.getUnitHashToSign(unit);
+        const textToSign = getUnitHashToSign(unit);
         const signature = sign(textToSign, privKeyBuf);
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
         unit.messages = [...customMessages];
-        unit.unit = objectHash.getUnitHash(unit);
+        unit.unit = getUnitHash(unit);
 
         return unit;
       },
