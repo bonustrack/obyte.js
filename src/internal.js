@@ -50,8 +50,6 @@ export function createNakedPaymentMessage(outputs, address) {
 export async function createPaymentMessage(client, lightProps, asset, fees, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  console.log('fees', fees);
-
   const targetAmount = amount + fees;
   const coinsForAmount = await client.pickDivisibleCoinsForAmount({
     addresses: [address],
