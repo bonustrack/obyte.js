@@ -117,7 +117,7 @@ export default class Client {
           address,
         );
         customMessages[0].payload.outputs.sort(sortOutputs);
-        customMessages[0].payload_hash = objectHash.getBase64Hash(customMessages[0].payload);
+        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload);
 
         if (payload.asset) {
           customMessages[1].payload.outputs.sort(sortOutputs);
