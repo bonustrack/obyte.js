@@ -4,6 +4,7 @@ import objectLength from 'byteballcore/object_length';
 import {
   repeatString,
   requiresDefinition,
+  createNakedPaymentMessage,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
@@ -45,14 +46,10 @@ export default class Client {
           self.getHistory({ witnesses, addresses: [address] }),
         ]);
 
-        const bytePayment = await createPaymentMessage(
-          self,
-          lightProps,
-          null,
-          app !== 'payment' || payload.asset ? [] : payload.outputs,
-          address,
-        );
-        const customMessages = [bytePayment];
+        const byteOutputs = app !== 'payment' || payload.asset ? [] : payload.outputs;
+        const nakedPayment = createNakedPaymentMessage(byteOutputs, address);
+
+        const customMessages = [nakedPayment];
 
         if (app === 'payment') {
           if (payload.asset) {
@@ -60,6 +57,7 @@ export default class Client {
               self,
               lightProps,
               payload.asset,
+              0,
               payload.outputs,
               address,
             );
@@ -107,7 +105,14 @@ export default class Client {
         const headersCommission = objectLength.getHeadersSize(unit);
         const payloadCommission = objectLength.getTotalPayloadSize(unit);
 
-        customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
+        customMessages[0] = await createPaymentMessage(
+          self,
+          lightProps,
+          null,
+          headersCommission + payloadCommission,
+          byteOutputs,
+          address,
+        );
         customMessages[0].payload.outputs.sort(sortOutputs);
         customMessages[0].payload_hash = objectHash.getBase64Hash(customMessages[0].payload);
 
@@ -116,16 +121,15 @@ export default class Client {
           customMessages[1].payload_hash = objectHash.getBase64Hash(customMessages[1].payload);
         }
 
+        unit.messages = [...customMessages];
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
-        unit.timestamp = Math.round(Date.now() / 1000);
 
         const textToSign = objectHash.getUnitHashToSign(unit);
         const signature = sign(textToSign, privKeyBuf);
         author = { address, authentifiers: { r: signature } };
         unit.authors = [author];
 
-        unit.messages = [...customMessages];
         unit.unit = objectHash.getUnitHash(unit);
 
         return unit;
