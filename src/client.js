@@ -118,7 +118,6 @@ export default class Client {
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
-        unit.timestamp = Math.round(Date.now() / 1000);
 
         const textToSign = objectHash.getUnitHashToSign(unit);
         const signature = sign(textToSign, privKeyBuf);
