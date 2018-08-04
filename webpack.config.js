@@ -1,4 +1,5 @@
 const path = require('path');
+const Visualizer = require('webpack-visualizer-plugin');
 const pkg = require('./package.json');
 
 const libraryName = pkg.name;
@@ -13,6 +14,7 @@ const config = {
     libraryTarget: 'umd',
     umdNamedDefine: true,
   },
+  plugins: [new Visualizer()],
   node: {
     fs: 'empty',
   },
