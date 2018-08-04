@@ -120,7 +120,7 @@ declare namespace Byteball {
     ): Promise<string>;
 
     getHistory(
-      params: { witnesses: string[]; addresses?: string[], requested_joints?: string[] },
+      params: { witnesses: string[]; addresses?: string[]; requested_joints?: string[] },
       callback?: (err: null | string, result: string | null) => void,
     ): Promise<HistoryResponse>;
 
@@ -200,10 +200,5 @@ declare namespace Byteball {
       vote(params: any): Promise<string>;
       payment(params: any): Promise<string>;
     };
-  }
-
-  namespace utils {
-    function generateRandomSeed(): string;
-    function isSeedValid(seed: string): boolean;
   }
 }
