@@ -120,7 +120,7 @@ declare namespace Byteball {
     ): Promise<string>;
 
     getHistory(
-      params: { witnesses: string[]; addresses: string[] },
+      params: { witnesses: string[]; addresses?: string[], requested_joints?: string[] },
       callback?: (err: null | string, result: string | null) => void,
     ): Promise<HistoryResponse>;
 
