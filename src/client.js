@@ -92,7 +92,7 @@ export default class Client {
           witness_list_unit: lightProps.witness_list_unit,
         };
 
-        let author = { address, authentifiers: {} };
+        const author = { address, authentifiers: {} };
         if (requireDefinition) {
           author.definition = definition;
         }
@@ -126,8 +126,7 @@ export default class Client {
 
         const textToSign = getUnitHashToSign(unit);
         const signature = sign(textToSign, privKeyBuf);
-        author = { address, authentifiers: { r: signature } };
-        unit.authors = [author];
+        unit.authors[0].authentifiers = { r: signature };
 
         unit.messages = [...customMessages];
         unit.unit = getUnitHash(unit);
