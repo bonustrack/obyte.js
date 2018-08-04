@@ -38,6 +38,7 @@
     "prettier": "^1.13.7",
     "taskr": "^1.1.0",
     "webpack": "^4.12.2",
-    "webpack-cli": "^3.0.8"
+    "webpack-cli": "^3.0.8",
+    "webpack-visualizer-plugin": "^0.1.11"
   }
 }
