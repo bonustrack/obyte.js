@@ -1,3 +1,4 @@
+import wifLib from 'wif';
 import {
   repeatString,
   requiresDefinition,
@@ -36,7 +37,8 @@ export default class Client {
     Object.assign(this, mapAPI(api, requestAsync));
 
     this.compose = {
-      async message(app, payload, privKeyBuf) {
+      async message(app, payload, wif) {
+        const privKeyBuf = wifLib.decode(wif, 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = ['sig', { pubkey }];
         const address = getChash160(definition);
@@ -135,8 +137,8 @@ export default class Client {
     };
 
     this.post = {
-      async message(app, payload, privKeyBuf) {
-        const unit = await self.compose.message(app, payload, privKeyBuf);
+      async message(app, payload, wif) {
+        const unit = await self.compose.message(app, payload, wif);
         return self.broadcast(unit);
       },
     };
