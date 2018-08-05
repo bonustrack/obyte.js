@@ -35,13 +35,13 @@ export function requiresDefinition(address, history) {
   return requireDefinition;
 }
 
-export async function createPaymentMessage(client, lightProps, asset, outputs, address) {
+export async function createPaymentMessage(client, asset, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
   const targetAmount = asset ? amount : 1000 + amount;
   const coinsForAmount = await client.pickDivisibleCoinsForAmount({
     addresses: [address],
-    last_ball_mci: lightProps.last_stable_mc_ball_mci,
+    last_ball_mci: 1000000000000000,
     amount: targetAmount,
     spend_unconfirmed: 'own',
     asset,

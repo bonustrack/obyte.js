@@ -52,7 +52,6 @@ export default class Client {
 
         const bytePayment = await createPaymentMessage(
           self,
-          lightProps,
           null,
           app !== 'payment' || payload.asset ? [] : payload.outputs,
           address,
@@ -63,7 +62,6 @@ export default class Client {
           if (payload.asset) {
             const assetPayment = await createPaymentMessage(
               self,
-              lightProps,
               payload.asset,
               payload.outputs,
               address,
