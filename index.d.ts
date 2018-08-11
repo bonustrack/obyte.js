@@ -88,7 +88,7 @@ declare namespace Byteball {
   }
 
   class Client {
-    constructor(nodeAddress?: string);
+    constructor(nodeAddress?: string, testnet?: boolean);
 
     /**
      * Broadcast a unit.
