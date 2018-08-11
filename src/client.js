@@ -15,14 +15,15 @@ import {
   getUnitHash,
 } from './internal';
 import WSClient from './wsclient';
-import { DEFAULT_NODE, VERSION, ALT } from './constants';
+import { DEFAULT_NODE, VERSION, VERSION_TESTNET, ALT, ALT_TESTNET } from './constants';
 import api from './api.json';
 import apps from './apps.json';
 
 export default class Client {
-  constructor(nodeAddress = DEFAULT_NODE) {
+  constructor(nodeAddress = DEFAULT_NODE, testnet = false) {
     const self = this;
 
+    this.testnet = testnet;
     this.client = new WSClient(nodeAddress);
     this.cachedWitnesses = null;
 
@@ -38,7 +39,7 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, wif) {
-        const privKeyBuf = wifLib.decode(wif, 128).privateKey;
+        const privKeyBuf = wifLib.decode(wif, self.testnet ? 239 : 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = ['sig', { pubkey }];
         const address = getChash160(definition);
@@ -80,8 +81,8 @@ export default class Client {
         const requireDefinition = requiresDefinition(address, history);
 
         const unit = {
-          version: VERSION,
-          alt: ALT,
+          version: self.testnet ? VERSION_TESTNET : VERSION,
+          alt: self.testnet ? ALT_TESTNET : ALT,
           messages: [...customMessages],
           authors: [],
           parent_units: lightProps.parent_units,
