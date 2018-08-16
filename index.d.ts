@@ -96,6 +96,10 @@ declare namespace Byteball {
      */
     broadcast(unit: Unit): Promise<string>;
 
+    subscribe(callback: (err: null | string, result: any) => void);
+
+    justsaying(subject: string, body: any);
+
     /**
      * Close underlying WebSocket client.
      */
