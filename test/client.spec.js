@@ -12,23 +12,23 @@ describe('Client', () => {
   });
 
   it('should support callbacks', done => {
-    client.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=', () => done());
+    client.api.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=', () => done());
   });
 
   it('should support promises', done => {
-    client.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(() => done());
+    client.api.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(() => done());
   });
 
   it('should support callbacks with empty params', done => {
-    client.getBots(() => done());
+    client.api.getBots(() => done());
   });
 
   it('should support promises with empty params', done => {
-    client.getBots().then(() => done());
+    client.api.getBots().then(() => done());
   });
 
   it('should catch error with promises', done => {
-    client.getParentsAndLastBallAndWitnessListUnit().catch(() => done());
+    client.api.getParentsAndLastBallAndWitnessListUnit().catch(() => done());
   });
 
   it('should cache witnesses', async () => {
@@ -47,16 +47,16 @@ describe('Client', () => {
       'UENJPVZ7HVHM6QGVGT6MWOJGGRTUTJXQ',
     ];
 
-    client.getWitnesses = jest.fn().mockReturnValue(witnesses);
+    client.api.getWitnesses = jest.fn().mockReturnValue(witnesses);
 
-    let receivedWitnesses = await client.getCachedWitnesses();
+    let receivedWitnesses = await client.api.getCachedWitnesses();
     expect(receivedWitnesses).toEqual(witnesses);
-    expect(client.getWitnesses).toHaveBeenCalled();
+    expect(client.api.getWitnesses).toHaveBeenCalled();
 
-    client.getWitnesses.mockClear();
+    client.api.getWitnesses.mockClear();
 
-    receivedWitnesses = await client.getCachedWitnesses();
+    receivedWitnesses = await client.api.getCachedWitnesses();
     expect(receivedWitnesses).toEqual(witnesses);
-    expect(client.getWitnesses).not.toHaveBeenCalled();
+    expect(client.api.getWitnesses).not.toHaveBeenCalled();
   });
 });

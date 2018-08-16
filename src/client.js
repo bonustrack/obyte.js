@@ -35,7 +35,14 @@ export default class Client {
         });
       });
 
-    Object.assign(this, mapAPI(api, requestAsync));
+    this.api = {
+      async getCachedWitnesses() {
+        if (self.cachedWitnesses) return self.cachedWitnesses;
+
+        self.cachedWitnesses = await self.api.getWitnesses();
+        return self.cachedWitnesses;
+      },
+    };
 
     this.compose = {
       async message(app, payload, wif) {
@@ -44,11 +51,11 @@ export default class Client {
         const definition = ['sig', { pubkey }];
         const address = getChash160(definition);
 
-        const witnesses = await self.getCachedWitnesses();
+        const witnesses = await self.api.getCachedWitnesses();
 
         const [lightProps, history] = await Promise.all([
-          self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          self.getHistory({ witnesses, addresses: [address] }),
+          self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          self.api.getHistory({ witnesses, addresses: [address] }),
         ]);
 
         const bytePayment = await createPaymentMessage(
@@ -141,6 +148,7 @@ export default class Client {
       },
     };
 
+    Object.assign(this.api, mapAPI(api, requestAsync));
     Object.assign(this.compose, mapAPI(apps, this.compose.message));
     Object.assign(this.post, mapAPI(apps, this.post.message));
   }
@@ -148,13 +156,6 @@ export default class Client {
   async broadcast(unit) {
     await this.postJoint({ unit });
     return unit.unit;
-  }
-
-  async getCachedWitnesses() {
-    if (this.cachedWitnesses) return this.cachedWitnesses;
-
-    this.cachedWitnesses = await this.getWitnesses();
-    return this.cachedWitnesses;
   }
 
   close() {
