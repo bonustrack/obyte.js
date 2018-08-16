@@ -49,13 +49,13 @@ describe('Client', () => {
 
     client.api.getWitnesses = jest.fn().mockReturnValue(witnesses);
 
-    let receivedWitnesses = await client.api.getCachedWitnesses();
+    let receivedWitnesses = await client.getCachedWitnesses();
     expect(receivedWitnesses).toEqual(witnesses);
     expect(client.api.getWitnesses).toHaveBeenCalled();
 
     client.api.getWitnesses.mockClear();
 
-    receivedWitnesses = await client.api.getCachedWitnesses();
+    receivedWitnesses = await client.getCachedWitnesses();
     expect(receivedWitnesses).toEqual(witnesses);
     expect(client.api.getWitnesses).not.toHaveBeenCalled();
   });

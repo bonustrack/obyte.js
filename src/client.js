@@ -35,14 +35,7 @@ export default class Client {
         });
       });
 
-    this.api = {
-      async getCachedWitnesses() {
-        if (self.cachedWitnesses) return self.cachedWitnesses;
-
-        self.cachedWitnesses = await self.api.getWitnesses();
-        return self.cachedWitnesses;
-      },
-    };
+    this.api = {};
 
     this.compose = {
       async message(app, payload, wif) {
@@ -51,7 +44,7 @@ export default class Client {
         const definition = ['sig', { pubkey }];
         const address = getChash160(definition);
 
-        const witnesses = await self.api.getCachedWitnesses();
+        const witnesses = await self.getCachedWitnesses();
 
         const [lightProps, history] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
@@ -154,8 +147,15 @@ export default class Client {
   }
 
   async broadcast(unit) {
-    await this.postJoint({ unit });
+    await this.api.postJoint({ unit });
     return unit.unit;
+  }
+
+  async getCachedWitnesses() {
+    if (this.cachedWitnesses) return this.cachedWitnesses;
+
+    this.cachedWitnesses = await this.api.getWitnesses();
+    return this.cachedWitnesses;
   }
 
   close() {
