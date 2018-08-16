@@ -158,6 +158,14 @@ export default class Client {
     return this.cachedWitnesses;
   }
 
+  subscribe(cb) {
+    this.client.subscribe(cb);
+  }
+
+  justsaying(subject, body) {
+    this.client.justsaying(subject, body);
+  }
+
   close() {
     this.client.close();
   }
