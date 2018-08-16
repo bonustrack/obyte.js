@@ -15,12 +15,12 @@ const byteball = require('byteball');
 const client = new byteball.Client();
 
 // Get peers
-client.getPeers(function(err, result) {
+client.api.getPeers(function(err, result) {
   console.log(err, result);
 });
 
 // Promises
-client.getPeers().then(function(result) {
+client.api.getPeers().then(function(result) {
   console.log(result);
 });
 ```

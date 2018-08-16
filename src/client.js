@@ -35,7 +35,7 @@ export default class Client {
         });
       });
 
-    Object.assign(this, mapAPI(api, requestAsync));
+    this.api = {};
 
     this.compose = {
       async message(app, payload, wif) {
@@ -47,8 +47,8 @@ export default class Client {
         const witnesses = await self.getCachedWitnesses();
 
         const [lightProps, history] = await Promise.all([
-          self.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          self.getHistory({ witnesses, addresses: [address] }),
+          self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          self.api.getHistory({ witnesses, addresses: [address] }),
         ]);
 
         const bytePayment = await createPaymentMessage(
@@ -141,19 +141,20 @@ export default class Client {
       },
     };
 
+    Object.assign(this.api, mapAPI(api, requestAsync));
     Object.assign(this.compose, mapAPI(apps, this.compose.message));
     Object.assign(this.post, mapAPI(apps, this.post.message));
   }
 
   async broadcast(unit) {
-    await this.postJoint({ unit });
+    await this.api.postJoint({ unit });
     return unit.unit;
   }
 
   async getCachedWitnesses() {
     if (this.cachedWitnesses) return this.cachedWitnesses;
 
-    this.cachedWitnesses = await this.getWitnesses();
+    this.cachedWitnesses = await this.api.getWitnesses();
     return this.cachedWitnesses;
   }
 
