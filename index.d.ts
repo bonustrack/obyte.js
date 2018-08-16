@@ -101,73 +101,75 @@ declare namespace Byteball {
      */
     close(): void;
 
-    getWitnesses(
-      callback?: (err: null | string, result: string[] | null) => void,
-    ): Promise<string[]>;
+    api: {
+      getWitnesses(
+        callback?: (err: null | string, result: string[] | null) => void,
+      ): Promise<string[]>;
 
-    getPeers(callback?: (err: null | string, result: string[] | null) => void): Promise<string[]>;
+      getPeers(callback?: (err: null | string, result: string[] | null) => void): Promise<string[]>;
 
-    getJoint(
-      id: string,
-      callback?: (err: null | string, joint: JointResponse | null) => void,
-    ): Promise<JointResponse>;
+      getJoint(
+        id: string,
+        callback?: (err: null | string, joint: JointResponse | null) => void,
+      ): Promise<JointResponse>;
 
-    getLastMci(callback?: (err: null | string, result: number | null) => void): Promise<number>;
+      getLastMci(callback?: (err: null | string, result: number | null) => void): Promise<number>;
 
-    postJoint(
-      params: { unit: Unit },
-      callback?: (err: null | string, result: string | null) => void,
-    ): Promise<string>;
+      postJoint(
+        params: { unit: Unit },
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string>;
 
-    getHistory(
-      params: { witnesses: string[]; addresses?: string[]; requested_joints?: string[] },
-      callback?: (err: null | string, result: string | null) => void,
-    ): Promise<HistoryResponse>;
+      getHistory(
+        params: { witnesses: string[]; addresses?: string[]; requested_joints?: string[] },
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<HistoryResponse>;
 
-    getParentsAndLastBallAndWitnessListUnit(
-      params: { witnesses: string[] },
-      callback?: (
-        err: null | string,
-        result: ParentsAndLastBallAndWitnessListUnitResponse | null,
-      ) => void,
-    ): Promise<ParentsAndLastBallAndWitnessListUnitResponse>;
+      getParentsAndLastBallAndWitnessListUnit(
+        params: { witnesses: string[] },
+        callback?: (
+          err: null | string,
+          result: ParentsAndLastBallAndWitnessListUnitResponse | null,
+        ) => void,
+      ): Promise<ParentsAndLastBallAndWitnessListUnitResponse>;
 
-    getAttestation(
-      params: {
-        attestor_address: string;
-        field: string;
-        value: string;
-      },
-      callback?: (err: null | string, result: string | null) => void,
-    ): Promise<string>;
+      getAttestation(
+        params: {
+          attestor_address: string;
+          field: string;
+          value: string;
+        },
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string>;
 
-    getAttestations(
-      params: { address: string },
-      callback?: (err: null | string, result: Attestation[] | null) => void,
-    ): Promise<Attestation[]>;
+      getAttestations(
+        params: { address: string },
+        callback?: (err: null | string, result: Attestation[] | null) => void,
+      ): Promise<Attestation[]>;
 
-    pickDivisibleCoinsForAmount(
-      params: {
-        addresses: string[];
-        last_ball_mci: number;
-        amount: number;
-        asset?: string;
-        spend_unconfirmed?: 'all' | 'own' | 'none';
-      },
-      callback?: (err: null | string, result: PickDivisibleCoinsForAmountResponse | null) => void,
-    ): Promise<PickDivisibleCoinsForAmountResponse>;
+      pickDivisibleCoinsForAmount(
+        params: {
+          addresses: string[];
+          last_ball_mci: number;
+          amount: number;
+          asset?: string;
+          spend_unconfirmed?: 'all' | 'own' | 'none';
+        },
+        callback?: (err: null | string, result: PickDivisibleCoinsForAmountResponse | null) => void,
+      ): Promise<PickDivisibleCoinsForAmountResponse>;
 
-    getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
+      getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
 
-    getAssetMetadata(
-      asset: string,
-      callback?: (err: null | string, result: any | null) => void,
-    ): Promise<any>;
+      getAssetMetadata(
+        asset: string,
+        callback?: (err: null | string, result: any | null) => void,
+      ): Promise<any>;
 
-    // Those require subscriptions
-    catchup(params: any): any;
-    getHashTree(params: any): any;
-    subscribe(params: any): any;
+      // Those require subscriptions
+      catchup(params: any): any;
+      getHashTree(params: any): any;
+      subscribe(params: any): any;
+    };
 
     compose: {
       message(app, payload, auth): Promise<object>;
