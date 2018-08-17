@@ -24,7 +24,9 @@ npm i byteball --save
 
 You can create an index.html file and include Byteball.js with:
 
-```<script src="https://cdn.jsdelivr.net/npm/byteball"></script>```
+```html
+<script src="https://cdn.jsdelivr.net/npm/byteball"></script>
+```
 
 ### Usage
 
