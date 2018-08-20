@@ -27,8 +27,8 @@ export default class WSClient {
     this.ws.addEventListener('message', data => {
       const message = JSON.parse(data.data);
       if (this.queue[message[1].tag]) {
-        const error = message[1].response.error || null;
-        const result = error ? null : message[1].response;
+        const error = message[1].response ? message[1].response.error || null : null;
+        const result = error ? null : message[1].response || null;
         this.queue[message[1].tag](error, result);
       } else {
         this.notifications(null, message);
