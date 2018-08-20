@@ -106,6 +106,8 @@ declare namespace Byteball {
     close(): void;
 
     api: {
+      heartbeat(callback?: (err: null | string, result: string[] | null) => void): Promise<string[]>;
+
       getWitnesses(
         callback?: (err: null | string, result: string[] | null) => void,
       ): Promise<string[]>;
