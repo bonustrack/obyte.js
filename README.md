@@ -67,7 +67,7 @@ client.api.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(functio
 
 To compose and post unit you need first to create a Byteball wallet and fund it with the native currency ‘bytes’. The generated WIF will be used on Byteball.js. Click on the link below to learn more:
 
-[Generate a random address](https://bonustrack.gitbook.io/byteball/utils/generate-wallet)
+[Generate a random address](https://byteballjs.com/utils/generate-wallet)
 
 Post a payment unit:
 ```js
