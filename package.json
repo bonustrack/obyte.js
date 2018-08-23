@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A pure and powerful JavaScript Byteball library",
   "homepage": "https://bonustrack.gitbook.io/byteball",
+  "browser": "dist/byteball.min.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/bonuschain/byteball.js.git"
@@ -12,6 +13,7 @@
   },
   "main": "lib/index.js",
   "files": [
+    "dist",
     "lib"
   ],
   "scripts": {
