@@ -19,6 +19,7 @@ export default class WSClient {
   constructor(address) {
     this.address = address;
     this.open = false;
+    this.shouldClose = false;
     this.queue = {};
     this.notifications = () => {};
 
@@ -36,7 +37,12 @@ export default class WSClient {
     });
 
     this.ws.addEventListener('open', () => {
-      this.open = true;
+      if (this.shouldClose) {
+        this.ws.close();
+        this.shouldClose = false;
+      } else {
+        this.open = true;
+      }
     });
 
     this.ws.addEventListener('close', () => {
@@ -55,7 +61,11 @@ export default class WSClient {
   }
 
   close() {
-    this.ws.close();
+    if (this.ws.readyState === WebSocket.CONNECTING) {
+      this.shouldClose = true;
+    } else {
+      this.ws.close();
+    }
   }
 
   request(command, params, cb) {
