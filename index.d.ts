@@ -164,6 +164,21 @@ declare namespace Byteball {
         callback?: (err: null | string, result: PickDivisibleCoinsForAmountResponse | null) => void,
       ): Promise<PickDivisibleCoinsForAmountResponse>;
 
+      getDefinition(
+        address: string,
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string[]>;
+
+      getBalances(
+        addresses: string[],
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string[]>;
+
+      getProfileUnits(
+        addresses: string[],
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string[]>;
+
       getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
 
       getAssetMetadata(
