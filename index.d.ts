@@ -63,6 +63,18 @@ declare namespace Byteball {
     description: string;
   }
 
+  interface EncryptedPackage {
+    encrypted_message: string;
+    iv: string;
+    authtag: string;
+    dh: Dh;
+  }
+
+  interface Dh {
+    sender_ephemeral_pubkey: string;
+    recipient_ephemeral_pubkey?: string;
+  }
+
   interface JointResponse {
     joint: Joint;
   }
@@ -180,6 +192,21 @@ declare namespace Byteball {
       ): Promise<string[]>;
 
       getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
+
+      getTempPubkey(
+        permanentPubkey: string,
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string[]>;
+
+      deliver(
+        params: {
+          encrypted_package: EncryptedPackage;
+          to: string;
+          pubkey: string;
+          signature: string;
+        },
+        callback?: (err: null | string, result: string | null) => void,
+      ): Promise<string[]>;
 
       getAssetMetadata(
         asset: string,

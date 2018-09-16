@@ -72,6 +72,17 @@
     "params": "array"
   },
   "hub/get_bots": {},
+  "hub/get_temp_pubkey": {
+    "params": "string"
+  },
+  "hub/deliver": {
+    "params": {
+      "encrypted_package": "object",
+      "to": "string",
+      "pubkey": "string",
+      "signature": "string"
+    }
+  },
   "hub/get_asset_metadata": {
     "params": "string"
   }
