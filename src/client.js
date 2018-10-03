@@ -1,7 +1,6 @@
 import wifLib from 'wif';
 import {
   repeatString,
-  requiresDefinition,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
@@ -46,9 +45,9 @@ export default class Client {
 
         const witnesses = await self.getCachedWitnesses();
 
-        const [lightProps, history] = await Promise.all([
+        const [lightProps, currentDefinition] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          self.api.getHistory({ witnesses, addresses: [address] }),
+          self.api.getDefinition(address),
         ]);
 
         const bytePayment = await createPaymentMessage(
@@ -78,8 +77,6 @@ export default class Client {
           });
         }
 
-        const requireDefinition = requiresDefinition(address, history);
-
         const unit = {
           version: self.testnet ? VERSION_TESTNET : VERSION,
           alt: self.testnet ? ALT_TESTNET : ALT,
@@ -92,7 +89,7 @@ export default class Client {
         };
 
         const author = { address, authentifiers: {} };
-        if (requireDefinition) {
+        if (!currentDefinition) {
           author.definition = definition;
         }
 
