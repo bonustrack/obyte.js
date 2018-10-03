@@ -1,10 +1,13 @@
 [![npm](https://img.shields.io/npm/v/byteball.svg)](https://www.npmjs.com/package/byteball)
+![npm](https://img.shields.io/npm/dm/byteball.svg)
 ![CircleCI](https://img.shields.io/circleci/project/github/bonuschain/byteball.js.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/bonuschain/byteball.js/master/LICENSE)
 
 # Byteball.js
 
 A pure and powerful JavaScript Byteball library.
+
+**[Documentation](https://byteballjs.com)**
 
 ## Getting started
 
