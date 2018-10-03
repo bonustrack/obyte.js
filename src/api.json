@@ -62,7 +62,27 @@
       "spend_unconfirmed": "string"
     }
   },
+  "light/get_definition": {
+    "params": "string"
+  },
+  "light/get_balances": {
+    "params": "array"
+  },
+  "light/get_profile_units": {
+    "params": "array"
+  },
   "hub/get_bots": {},
+  "hub/get_temp_pubkey": {
+    "params": "string"
+  },
+  "hub/deliver": {
+    "params": {
+      "encrypted_package": "object",
+      "to": "string",
+      "pubkey": "string",
+      "signature": "string"
+    }
+  },
   "hub/get_asset_metadata": {
     "params": "string"
   }
