@@ -20,21 +20,6 @@ export const camelCase = input =>
 export const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
-export function requiresDefinition(address, history) {
-  let requireDefinition = true;
-
-  const joints = history.joints.concat(history.unstable_mc_joints);
-  joints.forEach(joint => {
-    joint.unit.authors.forEach(author => {
-      if (author.address === address && author.definition) {
-        requireDefinition = false;
-      }
-    });
-  });
-
-  return requireDefinition;
-}
-
 export async function createPaymentMessage(client, asset, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
