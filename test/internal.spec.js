@@ -1,5 +1,14 @@
 import crypto from 'crypto';
-import { camelCase, repeatString, sortOutputs, mapAPI, sign, toPublicKey } from '../src/internal';
+import {
+  camelCase,
+  repeatString,
+  sortOutputs,
+  mapAPI,
+  sign,
+  toPublicKey,
+  getChash160,
+} from '../src/internal';
+import definition from './definition.json';
 
 describe('internal', () => {
   describe('camelCase', () => {
@@ -131,9 +140,14 @@ describe('internal', () => {
     it('should create valid signature', () => {
       const privKey = 'o3QzctZnfJPw0u8z2Sj6j2gCOvf1L4+CtmSfdy/B4Gk=';
       const privKeyBuf = Buffer.from(privKey, 'base64');
-      const hash = crypto.createHash('sha256').update('hello world', 'utf8').digest();
+      const hash = crypto
+        .createHash('sha256')
+        .update('hello world', 'utf8')
+        .digest();
 
-      expect(sign(hash, privKeyBuf)).toEqual('ssCl6equnJZGgKzTSJqsRr3tDN8BzmriGdMYPrVHyhYy+E/KV6/cA+sYX5i7TJ9voYpfd23EAFAYQoGy905Jgg==');
+      expect(sign(hash, privKeyBuf)).toEqual(
+        'ssCl6equnJZGgKzTSJqsRr3tDN8BzmriGdMYPrVHyhYy+E/KV6/cA+sYX5i7TJ9voYpfd23EAFAYQoGy905Jgg==',
+      );
     });
   });
 
@@ -143,6 +157,12 @@ describe('internal', () => {
       const privKeyBuf = Buffer.from(privKey, 'base64');
 
       expect(toPublicKey(privKeyBuf)).toEqual('A19xfW9UANOlhj9cK/13BdJCEgMJ2lH+iYvayv0FPLbN');
+    });
+  });
+
+  describe('getChash160', () => {
+    it('should convert definition to valid address', () => {
+      expect(getChash160(definition)).toEqual('5TROF7O466QKXR3N6AUYKYYQ2JCY24EJ');
     });
   });
 });
