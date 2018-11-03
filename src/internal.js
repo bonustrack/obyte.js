@@ -138,7 +138,7 @@ function getNakedUnit(objUnit) {
  * @param obj the value to be converted into a string
  * @returns {string} the string version of the value
  */
-function getSourceString(obj) {
+export function getSourceString(obj) {
   const arrComponents = [];
   function extractComponents(variable) {
     if (variable === null) throw Error(`null value in ${JSON.stringify(obj)}`);
@@ -243,7 +243,7 @@ function getChash(data, chashLength) {
   return chashLength === 160 ? base32.encode(chash).toString() : chash.toString('base64');
 }
 
-function chashGetChash160(data) {
+export function chashGetChash160(data) {
   return getChash(data, 160);
 }
 
@@ -294,10 +294,6 @@ export function getHeadersSize(objUnit) {
 export function getTotalPayloadSize(objUnit) {
   if (objUnit.content_hash) throw Error('trying to get payload size of stripped unit');
   return getLength(objUnit.messages);
-}
-
-export function getChash160(obj) {
-  return chashGetChash160(getSourceString(obj));
 }
 
 export function getBase64Hash(obj) {

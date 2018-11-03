@@ -1,14 +1,5 @@
 import crypto from 'crypto';
-import {
-  camelCase,
-  repeatString,
-  sortOutputs,
-  mapAPI,
-  sign,
-  toPublicKey,
-  getChash160,
-} from '../src/internal';
-import definition from './definition.json';
+import { camelCase, repeatString, sortOutputs, mapAPI, sign, toPublicKey } from '../src/internal';
 
 describe('internal', () => {
   describe('camelCase', () => {
@@ -157,12 +148,6 @@ describe('internal', () => {
       const privKeyBuf = Buffer.from(privKey, 'base64');
 
       expect(toPublicKey(privKeyBuf)).toEqual('A19xfW9UANOlhj9cK/13BdJCEgMJ2lH+iYvayv0FPLbN');
-    });
-  });
-
-  describe('getChash160', () => {
-    it('should convert definition to valid address', () => {
-      expect(getChash160(definition)).toEqual('5TROF7O466QKXR3N6AUYKYYQ2JCY24EJ');
     });
   });
 });
