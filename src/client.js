@@ -8,11 +8,11 @@ import {
   toPublicKey,
   getHeadersSize,
   getTotalPayloadSize,
-  getChash160,
   getBase64Hash,
   getUnitHashToSign,
   getUnitHash,
 } from './internal';
+import { getChash160 } from './utils';
 import WSClient from './wsclient';
 import { DEFAULT_NODE, VERSION, VERSION_TESTNET, ALT, ALT_TESTNET } from './constants';
 import api from './api.json';

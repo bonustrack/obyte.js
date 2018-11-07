@@ -1,0 +1,43 @@
+[
+  "or",
+  [
+    [
+      "and",
+      [
+        [
+          "address",
+          "ULQA63NGEZACP4N7ZMBUBISH6ZTCUS2Q"
+        ],
+        [
+          "in data feed",
+          [
+            [
+              "I2ADHGP4HL6J37NQAD73J7E5SKFIXJOT"
+            ],
+            "timestamp",
+            ">",
+            1525593731872
+          ]
+        ]
+      ]
+    ],
+    [
+      "and",
+      [
+        [
+          "address",
+          "53L7D42JLTFASHOS6VOM66K2TD3NP2PD"
+        ],
+        [
+          "has",
+          {
+            "what": "output",
+            "asset": "f2TMkqij/E3qx3ALfVBA8q5ve5xAwimUm92UrEribIE=",
+            "amount_at_least": 131072,
+            "address": "ULQA63NGEZACP4N7ZMBUBISH6ZTCUS2Q"
+          }
+        ]
+      ]
+    ]
+  ]
+]
