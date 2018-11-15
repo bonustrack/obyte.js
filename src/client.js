@@ -38,7 +38,8 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, options = {}) {
-        const conf = typeof options === 'object' ? { ...this.options, options } : { wif: options };
+        const conf =
+          typeof options === 'object' ? { ...self.options, ...options } : { wif: options };
         const privKeyBuf = wifLib.decode(conf.wif, conf.testnet ? 239 : 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = conf.definition || ['sig', { pubkey }];
