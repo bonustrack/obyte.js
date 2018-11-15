@@ -40,8 +40,10 @@ export default class Client {
       async message(app, payload, wif) {
         const privKeyBuf = wifLib.decode(wif, self.testnet ? 239 : 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
-        const definition = ['sig', { pubkey }];
+        // const definition = ['sig', { pubkey }];
+        const definition = ['and', [['address', 'TMWNLXR42CKIP4A774BQGNVBZAPHY7GH'], ['in data feed', [['BVVJ2K7ENPZZ3VYZFWQWK7ISPCATFIW3'], 'timestamp', '>', 1525593731872]]]];
         const address = getChash160(definition);
+        const path = 'r.0';
 
         const witnesses = await self.getCachedWitnesses();
 
@@ -121,8 +123,8 @@ export default class Client {
         unit.payload_commission = payloadCommission;
 
         const textToSign = getUnitHashToSign(unit);
-        const signature = sign(textToSign, privKeyBuf);
-        unit.authors[0].authentifiers = { r: signature };
+        unit.authors[0].authentifiers = {};
+        unit.authors[0].authentifiers[path] = sign(textToSign, privKeyBuf);
 
         unit.messages = [...customMessages];
         unit.unit = getUnitHash(unit);

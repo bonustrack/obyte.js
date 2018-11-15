@@ -23,7 +23,8 @@ export const repeatString = (str, times) =>
 export async function createPaymentMessage(client, asset, outputs, address) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  const targetAmount = asset ? amount : 1000 + amount;
+  // const targetAmount = asset ? amount : 1000 + amount;
+  const targetAmount = amount - 100;
   const coinsForAmount = await client.api.pickDivisibleCoinsForAmount({
     addresses: [address],
     last_ball_mci: 1000000000000000,
@@ -31,12 +32,13 @@ export async function createPaymentMessage(client, asset, outputs, address) {
     spend_unconfirmed: 'own',
     asset,
   });
+  console.log('Coin inputs', targetAmount, JSON.stringify(coinsForAmount));
 
   const inputs = coinsForAmount.inputs_with_proofs.map(input => input.input);
 
   const payload = {
     inputs,
-    outputs: [{ address, amount: coinsForAmount.total_amount - amount }, ...outputs],
+    outputs,
   };
 
   if (asset) {
