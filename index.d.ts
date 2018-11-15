@@ -106,7 +106,7 @@ declare namespace Byteball {
   }
 
   class Client {
-    constructor(nodeAddress?: string, testnet?: boolean);
+    constructor(nodeAddress?: string, clientOptions?: any);
 
     /**
      * Broadcast a unit.
@@ -226,7 +226,7 @@ declare namespace Byteball {
     };
 
     compose: {
-      message(app, payload, auth): Promise<object>;
+      message(app, payload, options): Promise<object>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<object>;
       asset(params: any): Promise<object>;
@@ -242,7 +242,7 @@ declare namespace Byteball {
     };
 
     post: {
-      message(app, payload, auth): Promise<string>;
+      message(app, payload, options): Promise<string>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<string>;
       asset(params: any): Promise<object>;
