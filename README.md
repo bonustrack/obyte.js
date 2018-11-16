@@ -38,7 +38,7 @@ Ways to initiate WebSocket client:
 ```js
 const byteball = require('byteball');
 
-// Connect to mainnet official node 'wss://byteball.org/ws'
+// Connect to mainnet official node 'wss://byteball.org/bb'
 const client = new byteball.Client();
 
 // Connect to a custom node
