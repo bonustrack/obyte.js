@@ -41,7 +41,7 @@ export default class Client {
         const conf =
           typeof options === 'object'
             ? { ...self.options, ...options }
-            : { ...self.options, ...{ wif: options } };
+            : { ...self.options, wif: options };
         const privKeyBuf = wifLib.decode(conf.wif, conf.testnet ? 239 : 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = conf.definition || ['sig', { pubkey }];
