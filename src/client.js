@@ -19,10 +19,10 @@ import api from './api.json';
 import apps from './apps.json';
 
 export default class Client {
-  constructor(nodeAddress = DEFAULT_NODE, testnet = false) {
+  constructor(nodeAddress = DEFAULT_NODE, clientOptions = {}) {
     const self = this;
 
-    this.testnet = testnet;
+    this.options = typeof clientOptions === 'object' ? clientOptions : { testnet: clientOptions };
     this.client = new WSClient(nodeAddress);
     this.cachedWitnesses = null;
 
@@ -37,11 +37,16 @@ export default class Client {
     this.api = {};
 
     this.compose = {
-      async message(app, payload, wif) {
-        const privKeyBuf = wifLib.decode(wif, self.testnet ? 239 : 128).privateKey;
+      async message(app, payload, options = {}) {
+        const conf =
+          typeof options === 'object'
+            ? { ...self.options, ...options }
+            : { ...self.options, wif: options };
+        const privKeyBuf = wifLib.decode(conf.wif, conf.testnet ? 239 : 128).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
-        const definition = ['sig', { pubkey }];
-        const address = getChash160(definition);
+        const definition = conf.definition || ['sig', { pubkey }];
+        const address = conf.address || getChash160(definition);
+        const path = conf.path || 'r';
 
         const witnesses = await self.getCachedWitnesses();
 
@@ -78,8 +83,8 @@ export default class Client {
         }
 
         const unit = {
-          version: self.testnet ? VERSION_TESTNET : VERSION,
-          alt: self.testnet ? ALT_TESTNET : ALT,
+          version: conf.testnet ? VERSION_TESTNET : VERSION,
+          alt: conf.testnet ? ALT_TESTNET : ALT,
           messages: [...customMessages],
           authors: [],
           parent_units: lightProps.parent_units,
@@ -121,8 +126,8 @@ export default class Client {
         unit.payload_commission = payloadCommission;
 
         const textToSign = getUnitHashToSign(unit);
-        const signature = sign(textToSign, privKeyBuf);
-        unit.authors[0].authentifiers = { r: signature };
+        unit.authors[0].authentifiers = {};
+        unit.authors[0].authentifiers[path] = sign(textToSign, privKeyBuf);
 
         unit.messages = [...customMessages];
         unit.unit = getUnitHash(unit);
@@ -132,8 +137,8 @@ export default class Client {
     };
 
     this.post = {
-      async message(app, payload, wif) {
-        const unit = await self.compose.message(app, payload, wif);
+      async message(app, payload, options) {
+        const unit = await self.compose.message(app, payload, options);
         return self.broadcast(unit);
       },
     };

@@ -2,6 +2,14 @@ export = Byteball;
 export as namespace Byteball;
 
 declare namespace Byteball {
+  interface Options {
+    testnet?: boolean;
+    wif?: string;
+    address?: string;
+    definition?: any[];
+    path?: string;
+  }
+
   interface Author {
     address: string;
     authentifiers: object;
@@ -106,7 +114,7 @@ declare namespace Byteball {
   }
 
   class Client {
-    constructor(nodeAddress?: string, testnet?: boolean);
+    constructor(nodeAddress?: string, clientOptions?: Options);
 
     /**
      * Broadcast a unit.
@@ -226,7 +234,7 @@ declare namespace Byteball {
     };
 
     compose: {
-      message(app, payload, auth): Promise<object>;
+      message(app, payload, options?: Options): Promise<object>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<object>;
       asset(params: any): Promise<object>;
@@ -242,7 +250,7 @@ declare namespace Byteball {
     };
 
     post: {
-      message(app, payload, auth): Promise<string>;
+      message(app, payload, options?: Options): Promise<string>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<string>;
       asset(params: any): Promise<object>;
