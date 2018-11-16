@@ -42,10 +42,11 @@ const byteball = require('byteball');
 const client = new byteball.Client();
 
 // Connect to a custom node
-const client = new byteball.Client('wss://byteball.fr/bb');
+const client = new byteball.Client('wss://byteball.org/bb');
 
 // Connect to testnet
-const client = new byteball.Client('wss://byteball.org/bb-test', true);
+const options = { testnet: true };
+const client = new byteball.Client('wss://byteball.org/bb-test', options);
 ```
 
 Close the client:
@@ -72,7 +73,7 @@ To compose and post unit you need first to create a Byteball wallet and fund it 
 
 [Generate a random address](https://byteballjs.com/utils/generate-wallet)
 
-Post a payment unit:
+Sending a payment:
 ```js
 const wif = '5JBFvTeSY5...'; // WIF string generated (private key)
 
