@@ -80,9 +80,10 @@ export default class Client {
         }
 
         const witnesses = await self.getCachedWitnesses();
-        const [lightProps, currentDefinition] = await Promise.all([
+        const [lightProps, networkDefinition, signerNetworkDefinition] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
           self.api.getDefinition(address),
+          isMultiAuthored ? self.api.getDefinition(signerAddress) : null,
         ]);
 
         const unit = {
@@ -99,14 +100,14 @@ export default class Client {
         unit.authors.push({
           address,
           authentifiers: { r: repeatString('-', 88) },
-          definition: !currentDefinition ? definition : undefined,
+          definition: !networkDefinition ? definition : undefined,
         });
 
         if (isMultiAuthored) {
           unit.authors.push({
             address: signerAddress,
             authentifiers: { r: repeatString('-', 88) },
-            definition: undefined, // TODO check for definition
+            definition: !signerNetworkDefinition ? signerDefinition : undefined,
           });
 
           unit.earned_headers_commission_recipients = [
