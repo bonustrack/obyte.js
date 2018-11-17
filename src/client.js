@@ -132,10 +132,11 @@ export default class Client {
         }
 
         const textToSign = getUnitHashToSign(unit);
+        const signature = sign(textToSign, privKeyBuf);
         unit.authors[0].authentifiers = {};
-        unit.authors[0].authentifiers[path] = sign(textToSign, privKeyBuf);
+        unit.authors[0].authentifiers[path] = signature;
         if (isMultiAuthored) {
-          unit.authors[1].authentifiers = { r: sign(textToSign, privKeyBuf) };
+          unit.authors[1].authentifiers = { r: signature };
         }
 
         unit.messages = [...customMessages];
