@@ -1,4 +1,3 @@
-import wifLib from 'wif';
 import {
   repeatString,
   createPaymentMessage,
@@ -12,7 +11,7 @@ import {
   getUnitHashToSign,
   getUnitHash,
 } from './internal';
-import { getChash160 } from './utils';
+import { getChash160, fromWif } from './utils';
 import WSClient from './wsclient';
 import { DEFAULT_NODE, VERSION, VERSION_TESTNET, ALT, ALT_TESTNET } from './constants';
 import api from './api.json';
@@ -42,7 +41,7 @@ export default class Client {
           typeof options === 'object'
             ? { ...self.options, ...options }
             : { ...self.options, wif: options };
-        const privKeyBuf = wifLib.decode(conf.wif, conf.testnet ? 239 : 128).privateKey;
+        const privKeyBuf = fromWif(conf.wif, conf.testnet).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = conf.definition || ['sig', { pubkey }];
         const address = conf.address || getChash160(definition);
