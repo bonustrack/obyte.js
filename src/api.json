@@ -65,6 +65,12 @@
   "light/get_definition": {
     "params": "string"
   },
+  "light/get_definition_chash": {
+    "params": {
+    "address": "string",
+    "max_mci?": "number"
+    }
+  },
   "light/get_balances": {
     "params": "array"
   },
