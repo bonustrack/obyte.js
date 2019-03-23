@@ -207,6 +207,32 @@ function calcOffsets(chashLength) {
 const arrOffsets160 = calcOffsets(160);
 const arrOffsets288 = calcOffsets(288);
 
+function separateIntoCleanDataAndChecksum(bin){
+  var len = bin.length;
+  var arrOffsets;
+  if (len === 160)
+    arrOffsets = arrOffsets160;
+  else if (len === 288)
+    arrOffsets = arrOffsets288;
+  else
+    throw Error("bad length="+len+", bin = "+bin);
+  var arrFrags = [];
+  var arrChecksumBits = [];
+  var start = 0;
+  for (var i=0; i<arrOffsets.length; i++){
+    arrFrags.push(bin.substring(start, arrOffsets[i]));
+    arrChecksumBits.push(bin.substr(arrOffsets[i], 1));
+    start = arrOffsets[i]+1;
+  }
+  // add last frag
+  if (start < bin.length)
+    arrFrags.push(bin.substring(start));
+  var binCleanData = arrFrags.join("");
+  var binChecksum = arrChecksumBits.join("");
+  return {clean_data: binCleanData, checksum: binChecksum};
+}
+
+
 function mixChecksumIntoCleanData(binCleanData, binChecksum) {
   if (binChecksum.length !== 32) throw Error('bad checksum length');
   const len = binCleanData.length + binChecksum.length;
@@ -241,6 +267,24 @@ function getChash(data, chashLength) {
   const binChash = mixChecksumIntoCleanData(binCleanData, binChecksum);
   const chash = bin2buffer(binChash);
   return chashLength === 160 ? base32.encode(chash).toString() : chash.toString('base64');
+}
+
+export function isChashValid(encoded){
+  var encoded_len = encoded.length;
+  if (encoded_len !== 32 && encoded_len !== 48) // 160/5 = 32, 288/6 = 48
+    throw Error("wrong encoded length: "+encoded_len);
+  try{
+    var chash = (encoded_len === 32) ? base32.decode(encoded) : new Buffer(encoded, 'base64');
+  }
+  catch(e){
+    console.log(e);
+    return false;
+  }
+  var binChash = buffer2bin(chash);
+  var separated = separateIntoCleanDataAndChecksum(binChash);
+  var clean_data = bin2buffer(separated.clean_data);
+  var checksum = bin2buffer(separated.checksum);
+  return checksum.equals(getChecksum(clean_data));
 }
 
 export function chashGetChash160(data) {
