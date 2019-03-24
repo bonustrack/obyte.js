@@ -8,6 +8,7 @@ declare namespace Byteball {
     address?: string;
     definition?: any[];
     path?: string;
+    private_key_buff?: buffer;
   }
 
   interface Author {
@@ -193,6 +194,14 @@ declare namespace Byteball {
       getDefinition(
         address: string,
         callback?: (err: null | string, result: any[] | null) => void,
+      ): Promise<any[]>;
+
+      getDefinitionChash(
+        params: {
+          address: string;
+          max_mci: number;
+        }
+        callback?: (err: null | string, result: string) => void,
       ): Promise<any[]>;
 
       getBalances(

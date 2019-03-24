@@ -68,7 +68,7 @@
   "light/get_definition_chash": {
     "params": {
     "address": "string",
-    "max_mci?": "number"
+    "max_mci": "number"
     }
   },
   "light/get_balances": {
