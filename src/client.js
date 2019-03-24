@@ -41,7 +41,7 @@ export default class Client {
           typeof options === 'object'
             ? { ...self.options, ...options }
             : { ...self.options, wif: options };
-        const privKeyBuf = conf.priv_key_buff || fromWif(conf.wif, conf.testnet).privateKey;
+        const privKeyBuf = conf.privKeyBuf || fromWif(conf.wif, conf.testnet).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = conf.definition || ['sig', { pubkey }];
         const address = conf.address || getChash160(definition);

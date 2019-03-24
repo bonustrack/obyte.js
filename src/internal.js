@@ -207,31 +207,26 @@ function calcOffsets(chashLength) {
 const arrOffsets160 = calcOffsets(160);
 const arrOffsets288 = calcOffsets(288);
 
-function separateIntoCleanDataAndChecksum(bin){
-  var len = bin.length;
-  var arrOffsets;
-  if (len === 160)
-    arrOffsets = arrOffsets160;
-  else if (len === 288)
-    arrOffsets = arrOffsets288;
-  else
-    throw Error("bad length="+len+", bin = "+bin);
-  var arrFrags = [];
-  var arrChecksumBits = [];
-  var start = 0;
-  for (var i=0; i<arrOffsets.length; i++){
+function separateIntoCleanDataAndChecksum(bin) {
+  const len = bin.length;
+  let arrOffsets;
+  if (len === 160) arrOffsets = arrOffsets160;
+  else if (len === 288) arrOffsets = arrOffsets288;
+  else throw Error(`bad length=${len}, bin = ${bin}`);
+  const arrFrags = [];
+  const arrChecksumBits = [];
+  let start = 0;
+  for (let i = 0; i < arrOffsets.length; i += 1) {
     arrFrags.push(bin.substring(start, arrOffsets[i]));
     arrChecksumBits.push(bin.substr(arrOffsets[i], 1));
-    start = arrOffsets[i]+1;
+    start = arrOffsets[i] + 1;
   }
   // add last frag
-  if (start < bin.length)
-    arrFrags.push(bin.substring(start));
-  var binCleanData = arrFrags.join("");
-  var binChecksum = arrChecksumBits.join("");
-  return {clean_data: binCleanData, checksum: binChecksum};
+  if (start < bin.length) arrFrags.push(bin.substring(start));
+  const binCleanData = arrFrags.join('');
+  const binChecksum = arrChecksumBits.join('');
+  return { cleanData: binCleanData, checksum: binChecksum };
 }
-
 
 function mixChecksumIntoCleanData(binCleanData, binChecksum) {
   if (binChecksum.length !== 32) throw Error('bad checksum length');
@@ -269,22 +264,23 @@ function getChash(data, chashLength) {
   return chashLength === 160 ? base32.encode(chash).toString() : chash.toString('base64');
 }
 
-export function isChashValid(encoded){
-  var encoded_len = encoded.length;
-  if (encoded_len !== 32 && encoded_len !== 48) // 160/5 = 32, 288/6 = 48
-    throw Error("wrong encoded length: "+encoded_len);
-  try{
-    var chash = (encoded_len === 32) ? base32.decode(encoded) : new Buffer(encoded, 'base64');
-  }
-  catch(e){
+export function isChashValid(encoded) {
+  const encodedLength = encoded.length;
+  let chash;
+  if (encodedLength !== 32 && encodedLength !== 48)
+    // 160/5 = 32, 288/6 = 48
+    throw Error(`wrong encoded length: ${encodedLength}`);
+  try {
+    chash = encodedLength === 32 ? base32.decode(encoded) : Buffer.from(encoded, 'base64');
+  } catch (e) {
     console.log(e);
     return false;
   }
-  var binChash = buffer2bin(chash);
-  var separated = separateIntoCleanDataAndChecksum(binChash);
-  var clean_data = bin2buffer(separated.clean_data);
-  var checksum = bin2buffer(separated.checksum);
-  return checksum.equals(getChecksum(clean_data));
+  const binChash = buffer2bin(chash);
+  const separated = separateIntoCleanDataAndChecksum(binChash);
+  const cleanData = bin2buffer(separated.cleanData);
+  const checksum = bin2buffer(separated.checksum);
+  return checksum.equals(getChecksum(cleanData));
 }
 
 export function chashGetChash160(data) {

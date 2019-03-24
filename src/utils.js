@@ -15,6 +15,11 @@ export function fromWif(string, testnet) {
   return wif.decode(string, version);
 }
 
-export function isValidAddress(address){
-  return (typeof address === "string" && address === address.toUpperCase() && address.length == 32 && isChashValid(address));
+export function isValidAddress(address) {
+  return (
+    typeof address === 'string' &&
+    address === address.toUpperCase() &&
+    address.length === 32 &&
+    isChashValid(address)
+  );
 }
