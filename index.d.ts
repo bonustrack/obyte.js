@@ -200,7 +200,7 @@ declare namespace Byteball {
         params: {
           address: string;
           max_mci: number;
-        }
+        },
         callback?: (err: null | string, result: string) => void,
       ): Promise<any[]>;
 
