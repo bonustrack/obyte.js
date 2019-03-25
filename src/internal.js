@@ -207,6 +207,27 @@ function calcOffsets(chashLength) {
 const arrOffsets160 = calcOffsets(160);
 const arrOffsets288 = calcOffsets(288);
 
+function separateIntoCleanDataAndChecksum(bin) {
+  const len = bin.length;
+  let arrOffsets;
+  if (len === 160) arrOffsets = arrOffsets160;
+  else if (len === 288) arrOffsets = arrOffsets288;
+  else throw Error(`bad length=${len}, bin = ${bin}`);
+  const arrFrags = [];
+  const arrChecksumBits = [];
+  let start = 0;
+  for (let i = 0; i < arrOffsets.length; i += 1) {
+    arrFrags.push(bin.substring(start, arrOffsets[i]));
+    arrChecksumBits.push(bin.substr(arrOffsets[i], 1));
+    start = arrOffsets[i] + 1;
+  }
+  // add last frag
+  if (start < bin.length) arrFrags.push(bin.substring(start));
+  const binCleanData = arrFrags.join('');
+  const binChecksum = arrChecksumBits.join('');
+  return { cleanData: binCleanData, checksum: binChecksum };
+}
+
 function mixChecksumIntoCleanData(binCleanData, binChecksum) {
   if (binChecksum.length !== 32) throw Error('bad checksum length');
   const len = binCleanData.length + binChecksum.length;
@@ -241,6 +262,25 @@ function getChash(data, chashLength) {
   const binChash = mixChecksumIntoCleanData(binCleanData, binChecksum);
   const chash = bin2buffer(binChash);
   return chashLength === 160 ? base32.encode(chash).toString() : chash.toString('base64');
+}
+
+export function isChashValid(encoded) {
+  const encodedLength = encoded.length;
+  let chash;
+  if (encodedLength !== 32 && encodedLength !== 48)
+    // 160/5 = 32, 288/6 = 48
+    throw Error(`wrong encoded length: ${encodedLength}`);
+  try {
+    chash = encodedLength === 32 ? base32.decode(encoded) : Buffer.from(encoded, 'base64');
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+  const binChash = buffer2bin(chash);
+  const separated = separateIntoCleanDataAndChecksum(binChash);
+  const cleanData = bin2buffer(separated.cleanData);
+  const checksum = bin2buffer(separated.checksum);
+  return checksum.equals(getChecksum(cleanData));
 }
 
 export function chashGetChash160(data) {
