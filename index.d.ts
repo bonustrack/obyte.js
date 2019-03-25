@@ -8,7 +8,7 @@ declare namespace Byteball {
     address?: string;
     definition?: any[];
     path?: string;
-    private_key_buff?: object;
+    privateKey?: any;
   }
 
   interface Author {
