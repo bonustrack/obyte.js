@@ -1,34 +1,34 @@
-[![npm](https://img.shields.io/npm/v/byteball.svg)](https://www.npmjs.com/package/byteball)
-![npm](https://img.shields.io/npm/dm/byteball.svg)
-![CircleCI](https://img.shields.io/circleci/project/github/bonuschain/byteball.js.svg)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/bonuschain/byteball.js/master/LICENSE)
+[![npm](https://img.shields.io/npm/v/obyte.svg)](https://www.npmjs.com/package/obyte)
+![npm](https://img.shields.io/npm/dm/obyte.svg)
+![CircleCI](https://img.shields.io/circleci/project/github/obytescript/obyte.js.svg)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/obytescript/obyte.js/master/LICENSE)
 
-# Byteball.js
+# Obyte.js
 
-A pure and powerful JavaScript Byteball library.
+A pure and powerful JavaScript Obyte library.
 
-**[Documentation](https://byteballjs.com)**
+**[Documentation](https://obytejs.com)**
 
 ## Getting started
 
-To install and run Byteball.js, follow this quick start guide
+To install and run Obyte.js, follow this quick start guide
 
 ### Install
 
-Byteball.js was designed to work both in the browser and in Node.js.
+Obyte.js was designed to work both in the browser and in Node.js.
 
 #### Node.js
-To install Byteball.js on Node.js, open your terminal and run:
+To install Obyte.js on Node.js, open your terminal and run:
 ```
-npm i byteball --save
+npm i obyte --save
 ```
 
 #### Browser
 
-You can create an index.html file and include Byteball.js with:
+You can create an index.html file and include Obyte.js with:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/byteball"></script>
+<script src="https://cdn.jsdelivr.net/npm/obyte"></script>
 ```
 
 ### Usage
@@ -36,17 +36,17 @@ You can create an index.html file and include Byteball.js with:
 Ways to initiate WebSocket client:
 
 ```js
-const byteball = require('byteball');
+const obyte = require('obyte');
 
-// Connect to mainnet official node 'wss://byteball.org/bb'
-const client = new byteball.Client();
+// Connect to mainnet official node 'wss://obyte.org/bb'
+const client = new obyte.Client();
 
 // Connect to a custom node
-const client = new byteball.Client('wss://byteball.org/bb');
+const client = new obyte.Client('wss://obyte.org/bb');
 
 // Connect to testnet
 const options = { testnet: true };
-const client = new byteball.Client('wss://byteball.org/bb-test', options);
+const client = new obyte.Client('wss://obyte.org/bb-test', options);
 ```
 
 Close the client:
@@ -69,9 +69,9 @@ client.api.getJoint('oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=').then(functio
 
 ### Transaction
 
-To compose and post unit you need first to create a Byteball wallet and fund it with the native currency ‘bytes’. The generated WIF will be used on Byteball.js. Click on the link below to learn more:
+To compose and post unit you need first to create a Obyte wallet and fund it with the native currency ‘bytes’. The generated WIF will be used on Obyte.js. Click on the link below to learn more:
 
-[Generate a random address](https://byteballjs.com/utils/generate-wallet)
+[Generate a random address](https://obytejs.com/utils/generate-wallet)
 
 Sending a payment:
 ```js
@@ -80,7 +80,7 @@ const wif = '5JBFvTeSY5...'; // WIF string generated (private key)
 const params = {
   outputs: [
     {
-      address: 'NX2BTV43XN6BOTCYZUUFU6TK7DVOC4LU', // The Byteball address of the recipient 
+      address: 'NX2BTV43XN6BOTCYZUUFU6TK7DVOC4LU', // The Obyte address of the recipient 
       amount: 1000 // The amount he receives
     }
   ]
