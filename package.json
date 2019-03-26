@@ -1,15 +1,15 @@
 {
-  "name": "byteball",
+  "name": "obyte",
   "version": "0.1.2",
-  "description": "A pure and powerful JavaScript Byteball library",
-  "homepage": "https://byteballjs.com",
-  "browser": "dist/byteball.min.js",
+  "description": "A pure and powerful JavaScript Obyte library",
+  "homepage": "https://obytejs.com",
+  "browser": "dist/obyte.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bonuschain/byteball.js.git"
+    "url": "https://github.com/obytescript/obyte.js.git"
   },
   "bugs": {
-    "url": "https://github.com/bonuschain/byteball.js/issues"
+    "url": "https://github.com/obytescript/obyte.js/issues"
   },
   "main": "lib/index.js",
   "files": [

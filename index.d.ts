@@ -1,7 +1,7 @@
-export = Byteball;
-export as namespace Byteball;
+export = Obyte;
+export as namespace Obyte;
 
-declare namespace Byteball {
+declare namespace Obyte {
   interface Options {
     testnet?: boolean;
     wif?: string;
