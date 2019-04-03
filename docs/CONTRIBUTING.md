@@ -23,7 +23,7 @@ A pull request doesn’t have to represent finished work. It’s usually better 
 
 If the project is on GitHub, here’s how to submit a pull request:
 
-* **Fork the repository** and clone it locally. Connect your local to the original “byteball.js” repository by adding it as a remote. Pull in changes from “kbyte” often so that you stay up to date so that when you submit your pull request, merge conflicts will be less likely.
+* **Fork the repository** and clone it locally. Connect your local to the original repository by adding it as a remote. Pull in changes from this repository often so that you stay up to date so that when you submit your pull request, merge conflicts will be less likely.
 * **Create a branch** for your edits.
 * **Reference any relevant issues** or supporting documentation in your PR (for example, “Closes #37.”)
 * **Include screenshots of the before and after** if your changes include differences in HTML/CSS. Drag and drop the images into the body of your pull request.
