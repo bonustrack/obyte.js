@@ -196,13 +196,20 @@ declare namespace Obyte {
         callback?: (err: null | string, result: any[] | null) => void,
       ): Promise<any[]>;
 
+      getDefinitionForAddress(
+        params: {
+          address: string,
+        },
+        callback?: (err: null | string, result: object) => void,
+      ): Promise<object>;
+
       getDefinitionChash(
         params: {
           address: string;
           max_mci: number;
         },
         callback?: (err: null | string, result: string) => void,
-      ): Promise<any[]>;
+      ): Promise<string>;
 
       getBalances(
         addresses: string[],

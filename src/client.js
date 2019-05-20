@@ -37,6 +37,7 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, options = {}) {
+        let isDefinitionRequired = false;
         const conf =
           typeof options === 'object'
             ? { ...self.options, ...options }
@@ -48,11 +49,21 @@ export default class Client {
         const path = conf.path || 'r';
 
         const witnesses = await self.getCachedWitnesses();
-
-        const [lightProps, currentDefinition] = await Promise.all([
+        const [lightProps, objDefinition] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
-          self.api.getDefinition(address),
+          self.api.getDefinitionForAddress({ address }),
         ]);
+        if (!objDefinition.definition && objDefinition.is_stable) {
+          isDefinitionRequired = true;
+        } else if (!objDefinition.is_stable)
+          throw new Error(
+            `Definition or definition change for address ${address} is not stable yet`,
+          );
+
+        if (objDefinition.definition_chash !== getChash160(definition))
+          throw new Error(
+            `Definition chash of address doesn't match the definition chash provided`,
+          );
 
         const bytePayment = await createPaymentMessage(
           self,
@@ -93,7 +104,7 @@ export default class Client {
         };
 
         const author = { address, authentifiers: {} };
-        if (!currentDefinition) {
+        if (isDefinitionRequired) {
           author.definition = definition;
         }
 
