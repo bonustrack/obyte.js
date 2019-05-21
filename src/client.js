@@ -102,6 +102,7 @@ export default class Client {
           last_ball_unit: lightProps.last_stable_mc_ball_unit,
           witness_list_unit: lightProps.witness_list_unit,
         };
+        unit.timestamp = Math.round(Date.now() / 1000);
 
         const author = { address, authentifiers: {} };
         if (isDefinitionRequired) {

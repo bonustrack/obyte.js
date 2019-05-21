@@ -122,7 +122,6 @@ function getNakedUnit(objUnit) {
   delete objNakedUnit.headers_commission;
   delete objNakedUnit.payload_commission;
   delete objNakedUnit.main_chain_index;
-  delete objNakedUnit.timestamp;
 
   if (objNakedUnit.messages) {
     for (let i = 0; i < objNakedUnit.messages.length; i += 1) {
