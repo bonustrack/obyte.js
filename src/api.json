@@ -87,7 +87,11 @@
     "params": "string"
   },
   "hub/temp_pubkey": {
-    "params": "object"
+    "params": {
+      "temp_pubkey": "string",
+      "pubkey": "string",
+      "signature": "string"
+    }
   },
   "hub/deliver": {
     "params": {
