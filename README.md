@@ -1,7 +1,7 @@
 [![npm](https://img.shields.io/npm/v/obyte.svg)](https://www.npmjs.com/package/obyte)
 ![npm](https://img.shields.io/npm/dm/obyte.svg)
-![CircleCI](https://img.shields.io/circleci/project/github/obytescript/obyte.js.svg)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/obytescript/obyte.js/master/LICENSE)
+![CircleCI](https://img.shields.io/circleci/project/github/bonustrack/obyte.js.svg)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/bonustrack/obyte.js/master/LICENSE)
 
 # Obyte.js
 

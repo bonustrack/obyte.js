@@ -6,10 +6,10 @@
   "browser": "dist/obyte.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/obytescript/obyte.js.git"
+    "url": "https://github.com/bonustrack/obyte.js.git"
   },
   "bugs": {
-    "url": "https://github.com/obytescript/obyte.js/issues"
+    "url": "https://github.com/bonustrack/obyte.js/issues"
   },
   "main": "lib/index.js",
   "files": [
