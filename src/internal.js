@@ -398,5 +398,6 @@ export function getUnitHash(objUnit) {
     objStrippedUnit.last_ball = objUnit.last_ball;
     objStrippedUnit.last_ball_unit = objUnit.last_ball_unit;
   }
+  objStrippedUnit.timestamp = objUnit.timestamp;
   return getBase64Hash(objStrippedUnit);
 }
