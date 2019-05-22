@@ -86,6 +86,9 @@
   "hub/get_temp_pubkey": {
     "params": "string"
   },
+  "hub/temp_pubkey": {
+    "params": "object"
+  },
   "hub/deliver": {
     "params": {
       "encrypted_package": "object",

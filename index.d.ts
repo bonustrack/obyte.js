@@ -228,6 +228,11 @@ declare namespace Obyte {
         callback?: (err: null | string, result: TempPubkey | null) => void,
       ): Promise<TempPubkey>;
 
+      tempPubkey(
+        params: object,
+        callback?: (err: null | string, result: string) => void,
+      )
+
       deliver(
         params: {
           encrypted_package: EncryptedPackage;
