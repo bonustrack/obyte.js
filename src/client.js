@@ -1,3 +1,13 @@
+import WSClient from './wsclient';
+import { getChash160, fromWif } from './utils';
+import {
+  DEFAULT_NODE,
+  VERSION,
+  VERSION_TESTNET,
+  ALT,
+  ALT_TESTNET,
+  VERSION_WITHOUT_TIMESTAMP,
+} from './constants';
 import {
   repeatString,
   createPaymentMessage,
@@ -11,9 +21,6 @@ import {
   getUnitHashToSign,
   getUnitHash,
 } from './internal';
-import { getChash160, fromWif } from './utils';
-import WSClient from './wsclient';
-import { DEFAULT_NODE, VERSION, VERSION_TESTNET, ALT, ALT_TESTNET } from './constants';
 import api from './api.json';
 import apps from './apps.json';
 
@@ -47,6 +54,8 @@ export default class Client {
         const definition = conf.definition || ['sig', { pubkey }];
         const address = conf.address || getChash160(definition);
         const path = conf.path || 'r';
+        const version = conf.testnet ? VERSION_TESTNET : VERSION;
+        const bJsonBased = version !== VERSION_WITHOUT_TIMESTAMP;
 
         const witnesses = await self.getCachedWitnesses();
         const [lightProps, objDefinition] = await Promise.all([
@@ -86,7 +95,7 @@ export default class Client {
         } else {
           customMessages.push({
             app,
-            payload_hash: getBase64Hash(payload),
+            payload_hash: getBase64Hash(payload, bJsonBased),
             payload_location: 'inline',
             payload,
           });
@@ -101,6 +110,7 @@ export default class Client {
           last_ball: lightProps.last_stable_mc_ball,
           last_ball_unit: lightProps.last_stable_mc_ball_unit,
           witness_list_unit: lightProps.witness_list_unit,
+          timestamp: Math.round(Date.now() / 1000),
         };
 
         const author = { address, authentifiers: {} };
@@ -125,11 +135,11 @@ export default class Client {
 
         customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
         customMessages[0].payload.outputs.sort(sortOutputs);
-        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload);
+        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload, bJsonBased);
 
         if (payload.asset) {
           customMessages[1].payload.outputs.sort(sortOutputs);
-          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload);
+          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload, bJsonBased);
         }
 
         unit.headers_commission = headersCommission;
