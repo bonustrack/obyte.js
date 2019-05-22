@@ -179,6 +179,34 @@ export function getSourceString(obj) {
   return arrComponents.join(STRING_JOIN_CHAR);
 }
 
+export function getJsonSourceString(obj) {
+  function stringify(variable) {
+    if (variable === null) throw Error(`null value in ${JSON.stringify(obj)}`);
+    switch (typeof variable) {
+      case 'string':
+        return JSON.stringify(variable);
+      case 'number':
+      case 'boolean':
+        return variable.toString();
+      case 'object':
+        if (Array.isArray(variable)) {
+          if (variable.length === 0) throw Error(`empty array in ${JSON.stringify(obj)}`);
+          return `[${variable.map(stringify).join(',')}]`;
+        }
+        const keys = Object.keys(variable).sort(); // eslint-disable-line no-case-declarations
+        if (keys.length === 0) throw Error(`empty object in ${JSON.stringify(obj)}`);
+        return `{${keys
+          .map(key => `${JSON.stringify(key)}:${stringify(variable[key])}`)
+          .join(',')}}`;
+      default:
+        throw Error(
+          `hash: unknown type=${typeof variable} of ${variable}, object: ${JSON.stringify(obj)}`,
+        );
+    }
+  }
+  return stringify(obj);
+}
+
 function calcOffsets(chashLength) {
   checkLength(chashLength);
   const arrOffsets = [];
@@ -324,7 +352,6 @@ export function getHeadersSize(objUnit) {
   delete objHeader.headers_commission;
   delete objHeader.payload_commission;
   delete objHeader.main_chain_index;
-  delete objHeader.timestamp;
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
   return getLength(objHeader) + PARENT_UNITS_SIZE;
@@ -337,7 +364,7 @@ export function getTotalPayloadSize(objUnit) {
 
 export function getBase64Hash(obj) {
   return createHash('sha256')
-    .update(getSourceString(obj), 'utf8')
+    .update(getJsonSourceString(obj), 'utf8')
     .digest('base64');
 }
 
@@ -346,7 +373,7 @@ export function getUnitHashToSign(objUnit) {
   for (let i = 0; i < objNakedUnit.authors.length; i += 1)
     delete objNakedUnit.authors[i].authentifiers;
   return createHash('sha256')
-    .update(getSourceString(objNakedUnit), 'utf8')
+    .update(getJsonSourceString(objNakedUnit), 'utf8')
     .digest();
 }
 
