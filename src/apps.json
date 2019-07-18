@@ -39,6 +39,9 @@
   "data_feed": {
     "params": "object"
   },
+  "definition": {
+    "params": "object"
+  },
   "definition_template": {
     "params": "array"
   },

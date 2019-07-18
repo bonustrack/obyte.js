@@ -266,6 +266,7 @@ declare namespace Obyte {
       assetAttestors(params: any): Promise<object>;
       data(params: any): Promise<object>;
       dataFeed(params: any): Promise<object>;
+      definition(params: any): Promise<string>;
       definitionTemplate(params: any): Promise<string>;
       poll(params: any): Promise<object>;
       profile(params: any): Promise<object>;
@@ -282,6 +283,7 @@ declare namespace Obyte {
       assetAttestors(params: any): Promise<object>;
       data(params: any): Promise<string>;
       dataFeed(params: any): Promise<string>;
+      definition(params: any): Promise<string>;
       definitionTemplate(params: any): Promise<string>;
       poll(params: any): Promise<string>;
       profile(params: any): Promise<string>;

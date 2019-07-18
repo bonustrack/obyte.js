@@ -1,5 +1,5 @@
 import WSClient from './wsclient';
-import { getChash160, fromWif } from './utils';
+import utils from './utils';
 import {
   DEFAULT_NODE,
   VERSION,
@@ -49,10 +49,10 @@ export default class Client {
           typeof options === 'object'
             ? { ...self.options, ...options }
             : { ...self.options, wif: options };
-        const privKeyBuf = conf.privateKey || fromWif(conf.wif, conf.testnet).privateKey;
+        const privKeyBuf = conf.privateKey || utils.fromWif(conf.wif, conf.testnet).privateKey;
         const pubkey = toPublicKey(privKeyBuf);
         const definition = conf.definition || ['sig', { pubkey }];
-        const address = conf.address || getChash160(definition);
+        const address = conf.address || utils.getChash160(definition);
         const path = conf.path || 'r';
         const version = conf.testnet ? VERSION_TESTNET : VERSION;
         const bJsonBased = version !== VERSION_WITHOUT_TIMESTAMP;
@@ -69,7 +69,7 @@ export default class Client {
             `Definition or definition change for address ${address} is not stable yet`,
           );
 
-        if (objDefinition.definition_chash !== getChash160(definition))
+        if (objDefinition.definition_chash !== utils.getChash160(definition))
           throw new Error(
             `Definition chash of address doesn't match the definition chash provided`,
           );

@@ -1,21 +1,25 @@
 import wif from 'wif';
-import { chashGetChash160, getSourceString, isChashValid } from './internal';
+import { chashGetChash160, getSourceString, isChashValid, getJsonSourceString } from './internal';
 
-export function getChash160(obj) {
-  return chashGetChash160(getSourceString(obj));
+function getChash160(obj) {
+  const sourceString =
+    Array.isArray(obj) && obj.length === 2 && obj[0] === 'autonomous agent'
+      ? getJsonSourceString(obj)
+      : getSourceString(obj);
+  return chashGetChash160(sourceString);
 }
 
-export function toWif(privateKey, testnet) {
+function toWif(privateKey, testnet) {
   const version = testnet ? 239 : 128;
   return wif.encode(version, privateKey, false);
 }
 
-export function fromWif(string, testnet) {
+function fromWif(string, testnet) {
   const version = testnet ? 239 : 128;
   return wif.decode(string, version);
 }
 
-export function isValidAddress(address) {
+function isValidAddress(address) {
   return (
     typeof address === 'string' &&
     address === address.toUpperCase() &&
@@ -23,3 +27,10 @@ export function isValidAddress(address) {
     isChashValid(address)
   );
 }
+
+export default {
+  getChash160,
+  toWif,
+  fromWif,
+  isValidAddress,
+};
