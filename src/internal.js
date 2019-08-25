@@ -44,14 +44,12 @@ export async function createPaymentMessage(client, asset, outputs, address) {
     payload.asset = asset;
   }
 
-  const payment = {
+  return {
     app: 'payment',
     payload_hash: '--------------------------------------------',
     payload_location: 'inline',
     payload,
   };
-
-  return payment;
 }
 
 export function sortOutputs(a, b) {
