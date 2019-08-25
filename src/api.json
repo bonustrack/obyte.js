@@ -67,8 +67,8 @@
   },
   "light/get_definition_chash": {
     "params": {
-    "address": "string",
-    "max_mci": "number"
+      "address": "string",
+      "max_mci": "number"
     }
 	},
 	"light/get_definition_for_address": {
@@ -81,6 +81,17 @@
   },
   "light/get_profile_units": {
     "params": "array"
+  },
+  "light/dry_run_aa": {
+    "params": {
+      "address": "string",
+      "trigger": "object"
+    }
+  },
+  "light/get_aa_state_vars": {
+    "params": {
+      "address": "string"
+    }
   },
   "hub/get_bots": {},
   "hub/get_temp_pubkey": {

@@ -221,6 +221,21 @@ declare namespace Obyte {
         callback?: (err: null | string, result: string[] | any[]) => void,
       ): Promise<string[]>;
 
+      dryRunAa(
+        params: {
+          address: string;
+          trigger: any;
+        },
+        callback?: (err: null | string, result: string) => void,
+      ): Promise<any>;
+
+      getAaStateVars(
+        params: {
+          address: string;
+        },
+        callback?: (err: null | string, result: string) => void,
+      ): Promise<object>;
+
       getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
 
       getTempPubkey(
