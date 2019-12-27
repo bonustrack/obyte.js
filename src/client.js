@@ -29,7 +29,7 @@ export default class Client {
     const self = this;
 
     this.options = typeof clientOptions === 'object' ? clientOptions : { testnet: clientOptions };
-    this.client = new WSClient(nodeAddress);
+    this.client = new WSClient(nodeAddress, this.options.reconnect || false);
     this.cachedWitnesses = null;
 
     const requestAsync = (name, params) =>
