@@ -9,6 +9,7 @@ declare namespace Obyte {
     definition?: any[];
     path?: string;
     privateKey?: any;
+    reconnect?: boolean;
   }
 
   interface Author {
@@ -133,7 +134,9 @@ declare namespace Obyte {
     close(): void;
 
     api: {
-      heartbeat(callback?: (err: null | string, result: string[] | null) => void): Promise<string[]>;
+      heartbeat(
+        callback?: (err: null | string, result: string[] | null) => void,
+      ): Promise<string[]>;
 
       getWitnesses(
         callback?: (err: null | string, result: string[] | null) => void,
@@ -198,7 +201,7 @@ declare namespace Obyte {
 
       getDefinitionForAddress(
         params: {
-          address: string,
+          address: string;
         },
         callback?: (err: null | string, result: object) => void,
       ): Promise<object>;
@@ -250,7 +253,7 @@ declare namespace Obyte {
           signature: string;
         },
         callback?: (err: null | string, result: string) => void,
-      )
+      );
 
       deliver(
         params: {

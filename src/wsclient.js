@@ -21,7 +21,7 @@ export default class WSClient {
     this.open = false;
     this.shouldClose = false;
     this.queue = {};
-    this.notifications = () => { };
+    this.notifications = () => {};
     this.connect = () => {
       const ws = new WebSocket(address);
 
@@ -51,12 +51,12 @@ export default class WSClient {
           this.ws = null;
           setTimeout(() => {
             this.connect();
-          }, 1000)
+          }, 1000);
         }
       });
 
       this.ws = ws;
-    }
+    };
     this.connect();
   }
 
