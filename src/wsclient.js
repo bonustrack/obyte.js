@@ -16,38 +16,48 @@ const wait = (ws, cb) => {
 };
 
 export default class WSClient {
-  constructor(address) {
+  constructor(address, reconnect) {
     this.address = address;
     this.open = false;
     this.shouldClose = false;
     this.queue = {};
     this.notifications = () => {};
+    this.connect = () => {
+      const ws = new WebSocket(address);
 
-    this.ws = new WebSocket(address);
+      ws.addEventListener('message', data => {
+        const message = JSON.parse(data.data);
+        if (this.queue[message[1].tag]) {
+          const error = message[1].response ? message[1].response.error || null : null;
+          const result = error ? null : message[1].response || null;
+          this.queue[message[1].tag](error, result);
+        } else {
+          this.notifications(null, message);
+        }
+      });
 
-    this.ws.addEventListener('message', data => {
-      const message = JSON.parse(data.data);
-      if (this.queue[message[1].tag]) {
-        const error = message[1].response ? message[1].response.error || null : null;
-        const result = error ? null : message[1].response || null;
-        this.queue[message[1].tag](error, result);
-      } else {
-        this.notifications(null, message);
-      }
-    });
+      ws.addEventListener('open', () => {
+        if (this.shouldClose) {
+          this.ws.close();
+          this.shouldClose = false;
+        } else {
+          this.open = true;
+        }
+      });
 
-    this.ws.addEventListener('open', () => {
-      if (this.shouldClose) {
-        this.ws.close();
-        this.shouldClose = false;
-      } else {
-        this.open = true;
-      }
-    });
+      ws.addEventListener('close', () => {
+        this.open = false;
+        if (reconnect) {
+          this.ws = null;
+          setTimeout(() => {
+            this.connect();
+          }, 1000);
+        }
+      });
 
-    this.ws.addEventListener('close', () => {
-      this.open = false;
-    });
+      this.ws = ws;
+    };
+    this.connect();
   }
 
   subscribe(cb) {
