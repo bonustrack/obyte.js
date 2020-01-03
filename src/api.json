@@ -95,14 +95,14 @@
   },
   "light/get_aas_by_base_aas": {
     "params": {
-      "base_aa": "object",
-      "base_aas": "object"
+      "base_aa": "string",
+      "base_aas": "array"
     }
   },
   "light/get_aa_responses": {
     "params": {
-      "aa": "object",
-      "aas": "object"
+      "aa": "string",
+      "aas": "array"
     }
   },
   "hub/get_bots": {},
