@@ -239,6 +239,22 @@ declare namespace Obyte {
         callback?: (err: null | string, result: string) => void,
       ): Promise<object>;
 
+      getAasByBaseAss(
+        params: {
+          base_aa: object;
+          base_aas: object;
+        },
+        callback?: (err: null | string, result: string[] | any[]) => void,
+      ): Promise<object>;
+
+      getAaResponses(
+        params: {
+          aa: object;
+          aas: object;
+        },
+        callback?: (err: null | string, result: object[] | any[]) => void,
+      ): Promise<object>;
+
       getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
 
       getTempPubkey(
