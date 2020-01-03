@@ -70,10 +70,10 @@
       "address": "string",
       "max_mci": "number"
     }
-	},
-	"light/get_definition_for_address": {
+  },
+  "light/get_definition_for_address": {
     "params": {
-    "address": "string"
+      "address": "string"
     }
   },
   "light/get_balances": {
@@ -91,6 +91,18 @@
   "light/get_aa_state_vars": {
     "params": {
       "address": "string"
+    }
+  },
+  "light/get_aas_by_base_aas": {
+    "params": {
+      "base_aa": "string",
+      "base_aas": "array"
+    }
+  },
+  "light/get_aa_responses": {
+    "params": {
+      "aa": "string",
+      "aas": "array"
     }
   },
   "hub/get_bots": {},
