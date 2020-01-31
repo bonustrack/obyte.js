@@ -21,7 +21,7 @@ export const camelCase = input =>
 export const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
-export async function createPaymentMessage(client, asset, outputs, address) {
+export async function createPaymentMessage(client, asset, outputs, address, spend_unconfirmed) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
   const targetAmount = asset ? amount : 1000 + amount;
@@ -29,7 +29,7 @@ export async function createPaymentMessage(client, asset, outputs, address) {
     addresses: [address],
     last_ball_mci: 1000000000000000,
     amount: targetAmount,
-    spend_unconfirmed: 'own',
+    spend_unconfirmed: spend_unconfirmed || 'own',
     asset,
   });
 

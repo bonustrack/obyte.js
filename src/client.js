@@ -79,6 +79,7 @@ export default class Client {
           null,
           app !== 'payment' || payload.asset ? [] : payload.outputs,
           address,
+          conf.spend_unconfirmed
         );
         const customMessages = [bytePayment];
 
@@ -89,6 +90,7 @@ export default class Client {
               payload.asset,
               payload.outputs,
               address,
+              conf.spend_unconfirmed
             );
             customMessages.push(assetPayment);
           }
