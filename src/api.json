@@ -105,6 +105,9 @@
       "aas": "array"
     }
   },
+  "light/get_data_feed": {
+    "params": "object"
+  },
   "hub/get_bots": {},
   "hub/get_temp_pubkey": {
     "params": "string"

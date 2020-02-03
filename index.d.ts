@@ -255,6 +255,20 @@ declare namespace Obyte {
         callback?: (err: null | string, result: object[] | any[]) => void,
       ): Promise<object>;
 
+      getDataFeed(
+        params: {
+          oracles: string[];
+          feed_name: string;
+          feed_value?: string | number | boolean;
+          min_mci?: number;
+          ifseveral?: 'abort' | 'last';
+          what?: 'unit' | 'value';
+          type?: 'string' | 'auto';
+          ifnone?: string | number | boolean;
+        },
+        callback?: (err: null | string, result: object[] | any[]) => void,
+      ): Promise<object>;
+
       getBots(callback?: (err: null | string, result: Bot[] | null) => void): Promise<Bot[]>;
 
       getTempPubkey(
