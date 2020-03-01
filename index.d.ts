@@ -128,6 +128,8 @@ declare namespace Obyte {
 
     justsaying(subject: string, body: any);
 
+    onConnect(callback: () => void);
+
     /**
      * Close underlying WebSocket client.
      */

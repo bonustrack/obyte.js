@@ -180,6 +180,10 @@ export default class Client {
     return this.cachedWitnesses;
   }
 
+  onConnect(cb) {
+    this.client.onConnect(cb);
+  }
+
   subscribe(cb) {
     this.client.subscribe(cb);
   }

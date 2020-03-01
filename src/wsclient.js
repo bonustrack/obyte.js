@@ -22,6 +22,7 @@ export default class WSClient {
     this.shouldClose = false;
     this.queue = {};
     this.notifications = () => {};
+    this.onConnectCallback = () => {};
     this.connect = () => {
       const ws = new WebSocket(address);
 
@@ -42,6 +43,7 @@ export default class WSClient {
           this.shouldClose = false;
         } else {
           this.open = true;
+          this.onConnectCallback();
         }
       });
 
@@ -58,6 +60,10 @@ export default class WSClient {
       this.ws = ws;
     };
     this.connect();
+  }
+
+  onConnect(cb) {
+    this.onConnectCallback = cb;
   }
 
   subscribe(cb) {
