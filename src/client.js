@@ -23,6 +23,7 @@ import {
 } from './internal';
 import api from './api.json';
 import apps from './apps.json';
+import expandApi from './expandApi';
 
 export default class Client {
   constructor(nodeAddress = DEFAULT_NODE, clientOptions = {}) {
@@ -163,7 +164,11 @@ export default class Client {
       },
     };
 
-    Object.assign(this.api, mapAPI(api, requestAsync));
+    Object.keys(expandApi).forEach(funcName => {
+      expandApi[funcName].bind(this.api);
+    });
+
+    Object.assign(this.api, mapAPI(api, requestAsync), expandApi);
     Object.assign(this.compose, mapAPI(apps, this.compose.message));
     Object.assign(this.post, mapAPI(apps, this.post.message));
   }

@@ -130,6 +130,10 @@ declare namespace Obyte {
 
     onConnect(callback: () => void);
 
+    getSymbolByAsset(tokenRegistryAddress: string, asset: string): Promise<string>;
+
+    getAssetBySymbol(tokenRegistryAddress: string, symbol: string): Promise<string>;
+
     /**
      * Close underlying WebSocket client.
      */
