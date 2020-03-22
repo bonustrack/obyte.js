@@ -12,7 +12,10 @@ async function getSymbolByAsset(tokenRegistryAddress, asset) {
     return null;
   }
 
-  const aaStateVars = await this.getAaStateVars({ address: tokenRegistryAddress });
+  const aaStateVars = await this.getAaStateVars({
+    address: tokenRegistryAddress,
+    var_prefix: `a2s_${asset}`,
+  });
 
   if (`a2s_${asset}` in aaStateVars) {
     return aaStateVars[`a2s_${asset}`];
@@ -26,14 +29,17 @@ async function getAssetBySymbol(tokenRegistryAddress, symbol) {
   }
 
   if (symbol === 'GBYTE' || symbol === 'MBYTE' || symbol === 'KBYTE' || symbol === 'BYTE') {
-    return null;
+    return 'base';
   }
 
   if (!utils.isValidAddress(tokenRegistryAddress)) {
     return null;
   }
 
-  const aaStateVars = await this.getAaStateVars({ address: tokenRegistryAddress });
+  const aaStateVars = await this.getAaStateVars({
+    address: tokenRegistryAddress,
+    var_prefix: `s2a_${symbol}`,
+  });
 
   if (`s2a_${symbol}` in aaStateVars) {
     return aaStateVars[`s2a_${symbol}`];
