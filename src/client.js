@@ -93,6 +93,14 @@ export default class Client {
             );
             customMessages.push(assetPayment);
           }
+          if (payload.data) {
+            customMessages.push({
+              app: 'data',
+              payload_hash: getBase64Hash(payload.data, bJsonBased),
+              payload_location: 'inline',
+              payload: payload.data,
+            });
+          }
         } else {
           customMessages.push({
             app,
@@ -113,6 +121,7 @@ export default class Client {
           witness_list_unit: lightProps.witness_list_unit,
           timestamp: Math.round(Date.now() / 1000),
         };
+
 
         const author = { address, authentifiers: {} };
         if (isDefinitionRequired) {
