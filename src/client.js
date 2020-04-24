@@ -122,7 +122,6 @@ export default class Client {
           timestamp: Math.round(Date.now() / 1000),
         };
 
-
         const author = { address, authentifiers: {} };
         if (isDefinitionRequired) {
           author.definition = definition;
