@@ -21,10 +21,11 @@ export const camelCase = input =>
 export const repeatString = (str, times) =>
   str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
-export async function createPaymentMessage(client, asset, outputs, address) {
+export async function createPaymentMessage(client, asset, outputs, address, payloadLength) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  const targetAmount = asset ? amount : 1000 + amount;
+  const targetAmount = asset ? amount : 700 + payloadLength + amount;
+
   const coinsForAmount = await client.api.pickDivisibleCoinsForAmount({
     addresses: [address],
     last_ball_mci: 1000000000000000,
@@ -42,6 +43,9 @@ export async function createPaymentMessage(client, asset, outputs, address) {
 
   if (asset) {
     payload.asset = asset;
+    if (payload.outputs[0].amount === 0)
+      // amount 0 output is not valid
+      payload.outputs = payload.outputs.slice(1);
   }
 
   return {
@@ -316,7 +320,7 @@ export function chashGetChash160(data) {
 
 export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');
 
-function getLength(value) {
+export function getLength(value) {
   if (value === null) return 0;
   switch (typeof value) {
     case 'string':
