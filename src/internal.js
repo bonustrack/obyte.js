@@ -4,6 +4,7 @@ import base32 from 'thirty-two';
 import { VERSION_WITHOUT_TIMESTAMP } from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
+const SIGNATURE_SIZE = 88;
 const PI = '14159265358979323846264338327950288419716939937510';
 const STRING_JOIN_CHAR = '\x00';
 const ZERO_STRING = '00000000';
@@ -17,9 +18,6 @@ export const camelCase = input =>
     .map(p => p.charAt(0).toUpperCase() + p.slice(1))
     .join('')
     .replace(/^\w/, c => c.toLowerCase());
-
-export const repeatString = (str, times) =>
-  str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
 
 export async function createPaymentMessage(
   client,
@@ -366,7 +364,7 @@ export function getHeadersSize(objUnit) {
   if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objHeader.timestamp;
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
-  return getLength(objHeader) + PARENT_UNITS_SIZE;
+  return getLength(objHeader) + PARENT_UNITS_SIZE + SIGNATURE_SIZE; // unit is always single authored thus only has 1 signature in authentifiers
 }
 
 export function getTotalPayloadSize(objUnit) {

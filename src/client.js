@@ -9,7 +9,6 @@ import {
   VERSION_WITHOUT_TIMESTAMP,
 } from './constants';
 import {
-  repeatString,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
@@ -131,16 +130,6 @@ export default class Client {
           author.definition = definition;
         }
 
-        const assocSigningPaths = {};
-        const assocLengthsBySigningPaths = { r: 88 };
-        const arrSigningPaths = Object.keys(assocLengthsBySigningPaths);
-        assocSigningPaths[address] = arrSigningPaths;
-        for (let j = 0; j < arrSigningPaths.length; j += 1) {
-          author.authentifiers[arrSigningPaths[j]] = repeatString(
-            '-',
-            assocLengthsBySigningPaths[arrSigningPaths[j]],
-          );
-        }
         unit.authors.push(author);
 
         const headersCommission = getHeadersSize(unit);
