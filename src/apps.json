@@ -68,5 +68,8 @@
       "outputs": "array",
       "asset": "string"
     }
-  }
+	},
+	"multi" : {
+		"params": "object"
+	}
 }

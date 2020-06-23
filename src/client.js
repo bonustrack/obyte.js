@@ -20,6 +20,7 @@ import {
   getBase64Hash,
   getUnitHashToSign,
   getUnitHash,
+  getLength,
 } from './internal';
 import api from './api.json';
 import apps from './apps.json';
@@ -45,6 +46,15 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, options = {}) {
+        const messages = app === 'multi' ? payload : [{ app, payload }];
+
+        messages.sort(a => {
+          return a.app === 'payment' && !a.payload.asset ? -1 : 1; // we place byte payment message first
+        });
+        if (messages[0].app !== 'payment' || messages[0].payload.asset)
+          // if no byte payment, we add one
+          messages.unshift({ app: 'payment', payload: { outputs: [] } });
+
         let isDefinitionRequired = false;
         const conf =
           typeof options === 'object'
@@ -75,45 +85,39 @@ export default class Client {
             `Definition chash of address doesn't match the definition chash provided`,
           );
 
-        const bytePayment = await createPaymentMessage(
-          self,
-          null,
-          app !== 'payment' || payload.asset ? [] : payload.outputs,
-          address,
-        );
-        const customMessages = [bytePayment];
+        const payloadsLength = messages.reduce(
+          (a, b) => a + 50 + getLength(b.app) + getLength(b.payload),
+          0,
+        ); // 50 is equal to 'inline' + hash length
 
-        if (app === 'payment') {
-          if (payload.asset) {
+        async function createUnitMessage(message) {
+          if (message.app === 'payment') {
             const assetPayment = await createPaymentMessage(
               self,
-              payload.asset,
-              payload.outputs,
+              message.payload.asset,
+              message.payload.outputs,
               address,
+              payloadsLength,
+              lightProps.last_stable_mc_ball_mci,
             );
-            customMessages.push(assetPayment);
+            assetPayment.payload.outputs.sort(sortOutputs);
+            assetPayment.payload_hash = getBase64Hash(assetPayment.payload, bJsonBased);
+            return assetPayment;
           }
-          if (payload.data) {
-            customMessages.push({
-              app: 'data',
-              payload_hash: getBase64Hash(payload.data, bJsonBased),
-              payload_location: 'inline',
-              payload: payload.data,
-            });
-          }
-        } else {
-          customMessages.push({
-            app,
-            payload_hash: getBase64Hash(payload, bJsonBased),
+          return {
+            app: message.app,
+            payload_hash: getBase64Hash(message.payload, bJsonBased),
             payload_location: 'inline',
-            payload,
-          });
+            payload: message.payload,
+          };
         }
+
+        const unitMessages = await Promise.all(messages.map(createUnitMessage));
 
         const unit = {
           version: conf.testnet ? VERSION_TESTNET : VERSION,
           alt: conf.testnet ? ALT_TESTNET : ALT,
-          messages: [...customMessages],
+          messages: [...unitMessages],
           authors: [],
           parent_units: lightProps.parent_units,
           last_ball: lightProps.last_stable_mc_ball,
@@ -142,14 +146,9 @@ export default class Client {
         const headersCommission = getHeadersSize(unit);
         const payloadCommission = getTotalPayloadSize(unit);
 
-        customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
-        customMessages[0].payload.outputs.sort(sortOutputs);
-        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload, bJsonBased);
-
-        if (payload.asset) {
-          customMessages[1].payload.outputs.sort(sortOutputs);
-          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload, bJsonBased);
-        }
+        unitMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
+        unitMessages[0].payload.outputs.sort(sortOutputs);
+        unitMessages[0].payload_hash = getBase64Hash(unitMessages[0].payload, bJsonBased);
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
@@ -158,7 +157,7 @@ export default class Client {
         unit.authors[0].authentifiers = {};
         unit.authors[0].authentifiers[path] = sign(textToSign, privKeyBuf);
 
-        unit.messages = [...customMessages];
+        unit.messages = [...unitMessages];
         unit.unit = getUnitHash(unit);
 
         return unit;
