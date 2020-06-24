@@ -4,6 +4,7 @@ import base32 from 'thirty-two';
 import { VERSION_WITHOUT_TIMESTAMP } from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
+const SIGNATURE_SIZE = 88;
 const PI = '14159265358979323846264338327950288419716939937510';
 const STRING_JOIN_CHAR = '\x00';
 const ZERO_STRING = '00000000';
@@ -18,16 +19,21 @@ export const camelCase = input =>
     .join('')
     .replace(/^\w/, c => c.toLowerCase());
 
-export const repeatString = (str, times) =>
-  str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
-
-export async function createPaymentMessage(client, asset, outputs, address) {
+export async function createPaymentMessage(
+  client,
+  asset,
+  outputs,
+  address,
+  payloadLength,
+  lastBallMci,
+) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  const targetAmount = asset ? amount : 1000 + amount;
+  const targetAmount = asset ? amount : 700 + payloadLength + amount;
+
   const coinsForAmount = await client.api.pickDivisibleCoinsForAmount({
     addresses: [address],
-    last_ball_mci: 1000000000000000,
+    last_ball_mci: lastBallMci,
     amount: targetAmount,
     spend_unconfirmed: 'own',
     asset,
@@ -42,6 +48,9 @@ export async function createPaymentMessage(client, asset, outputs, address) {
 
   if (asset) {
     payload.asset = asset;
+    if (payload.outputs[0].amount === 0)
+      // amount 0 output is not valid
+      payload.outputs = payload.outputs.slice(1);
   }
 
   return {
@@ -316,7 +325,7 @@ export function chashGetChash160(data) {
 
 export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');
 
-function getLength(value) {
+export function getLength(value) {
   if (value === null) return 0;
   switch (typeof value) {
     case 'string':
@@ -355,7 +364,7 @@ export function getHeadersSize(objUnit) {
   if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objHeader.timestamp;
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
-  return getLength(objHeader) + PARENT_UNITS_SIZE;
+  return getLength(objHeader) + PARENT_UNITS_SIZE + SIGNATURE_SIZE; // unit is always single authored thus only has 1 signature in authentifiers
 }
 
 export function getTotalPayloadSize(objUnit) {
