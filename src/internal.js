@@ -1,9 +1,9 @@
 import ecdsa from 'secp256k1';
 import createHash from 'create-hash';
 import base32 from 'thirty-two';
-import { VERSION_WITHOUT_TIMESTAMP } from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
+const PARENT_UNITS_KEY_SIZE = 'parent_units'.length;
 const SIGNATURE_SIZE = 88;
 const PI = '14159265358979323846264338327950288419716939937510';
 const STRING_JOIN_CHAR = '\x00';
@@ -130,7 +130,6 @@ function getNakedUnit(objUnit) {
   delete objNakedUnit.headers_commission;
   delete objNakedUnit.payload_commission;
   delete objNakedUnit.main_chain_index;
-  if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objNakedUnit.timestamp;
 
   if (objNakedUnit.messages) {
     for (let i = 0; i < objNakedUnit.messages.length; i += 1) {
@@ -325,7 +324,7 @@ export function chashGetChash160(data) {
 
 export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');
 
-export function getLength(value) {
+export function getLength(value, bWithKeys) {
   if (value === null) return 0;
   switch (typeof value) {
     case 'string':
@@ -336,13 +335,14 @@ export function getLength(value) {
       let len = 0;
       if (Array.isArray(value)) {
         value.forEach(element => {
-          len += getLength(element);
+          len += getLength(element, bWithKeys);
         });
       } else {
         Object.keys(value).forEach(key => {
           if (typeof value[key] === 'undefined')
             throw Error(`undefined at ${key} of ${JSON.stringify(value)}`);
-          len += getLength(value[key]);
+          if (bWithKeys) len += key.length;
+          len += getLength(value[key], bWithKeys);
         });
       }
       return len;
@@ -354,22 +354,26 @@ export function getLength(value) {
   }
 }
 
-export function getHeadersSize(objUnit) {
+export function getHeadersSize(objUnit, bWithKeys) {
   if (objUnit.content_hash) throw Error('trying to get headers size of stripped unit');
   const objHeader = JSON.parse(JSON.stringify(objUnit));
   delete objHeader.unit;
   delete objHeader.headers_commission;
   delete objHeader.payload_commission;
   delete objHeader.main_chain_index;
-  if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objHeader.timestamp;
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
-  return getLength(objHeader) + PARENT_UNITS_SIZE + SIGNATURE_SIZE; // unit is always single authored thus only has 1 signature in authentifiers
+  return (
+    getLength(objHeader, bWithKeys) +
+    PARENT_UNITS_SIZE +
+    (bWithKeys ? PARENT_UNITS_KEY_SIZE : 0) +
+    SIGNATURE_SIZE
+  ); // unit is always single authored thus only has 1 signature in authentifiers
 }
 
-export function getTotalPayloadSize(objUnit) {
+export function getTotalPayloadSize(objUnit, bWithKeys) {
   if (objUnit.content_hash) throw Error('trying to get payload size of stripped unit');
-  return getLength(objUnit.messages);
+  return getLength({ messages: objUnit.messages }, bWithKeys);
 }
 
 export function getBase64Hash(obj, bJsonBased) {
@@ -383,24 +387,20 @@ export function getUnitHashToSign(objUnit) {
   const objNakedUnit = getNakedUnit(objUnit);
   for (let i = 0; i < objNakedUnit.authors.length; i += 1)
     delete objNakedUnit.authors[i].authentifiers;
-  const sourceString =
-    objUnit.version === VERSION_WITHOUT_TIMESTAMP
-      ? getSourceString(objNakedUnit)
-      : getJsonSourceString(objNakedUnit);
+  const sourceString = getJsonSourceString(objNakedUnit);
   return createHash('sha256')
     .update(sourceString, 'utf8')
     .digest();
 }
 
 function getUnitContentHash(objUnit) {
-  return getBase64Hash(getNakedUnit(objUnit), objUnit.version !== VERSION_WITHOUT_TIMESTAMP);
+  return getBase64Hash(getNakedUnit(objUnit), true);
 }
 
 export function getUnitHash(objUnit) {
-  const bVersion2 = objUnit.version !== VERSION_WITHOUT_TIMESTAMP;
   if (objUnit.content_hash)
     // already stripped
-    return getBase64Hash(getNakedUnit(objUnit), bVersion2);
+    return getBase64Hash(getNakedUnit(objUnit), true);
   const objStrippedUnit = {
     content_hash: getUnitContentHash(objUnit),
     version: objUnit.version,
@@ -414,6 +414,6 @@ export function getUnitHash(objUnit) {
     objStrippedUnit.last_ball = objUnit.last_ball;
     objStrippedUnit.last_ball_unit = objUnit.last_ball_unit;
   }
-  if (bVersion2) objStrippedUnit.timestamp = objUnit.timestamp;
-  return getBase64Hash(objStrippedUnit, bVersion2);
+  objStrippedUnit.timestamp = objUnit.timestamp;
+  return getBase64Hash(objStrippedUnit, true);
 }

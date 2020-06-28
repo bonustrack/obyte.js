@@ -6,7 +6,8 @@ import {
   VERSION_TESTNET,
   ALT,
   ALT_TESTNET,
-  VERSION_WITHOUT_TIMESTAMP,
+  VERSION_WITHOUT_KEY_SIZES,
+  KEY_SIZE_UPGRADE_MCI,
 } from './constants';
 import {
   createPaymentMessage,
@@ -64,14 +65,20 @@ export default class Client {
         const definition = conf.definition || ['sig', { pubkey }];
         const address = conf.address || utils.getChash160(definition);
         const path = conf.path || 'r';
-        const version = conf.testnet ? VERSION_TESTNET : VERSION;
-        const bJsonBased = version !== VERSION_WITHOUT_TIMESTAMP;
 
         const witnesses = await self.getCachedWitnesses();
         const [lightProps, objDefinition] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
           self.api.getDefinitionForAddress({ address }),
         ]);
+        const bWithKeys =
+          conf.testnet || lightProps.last_stable_mc_ball_mci >= KEY_SIZE_UPGRADE_MCI;
+        let version;
+        if (conf.testnet) version = VERSION_TESTNET;
+        else if (bWithKeys) version = VERSION;
+        else version = VERSION_WITHOUT_KEY_SIZES;
+        const bJsonBased = true;
+
         if (!objDefinition.definition && objDefinition.is_stable) {
           isDefinitionRequired = true;
         } else if (!objDefinition.is_stable)
@@ -85,9 +92,9 @@ export default class Client {
           );
 
         const payloadsLength = messages.reduce(
-          (a, b) => a + 50 + getLength(b.app) + getLength(b.payload),
+          (a, b) => a + 78 + getLength(b.app, bWithKeys) + getLength(b.payload, bWithKeys),
           0,
-        ); // 50 is equal to 'inline' + hash length
+        ); // 78 for payload_location and payload_hash
 
         async function createUnitMessage(message) {
           if (message.app === 'payment') {
@@ -114,7 +121,7 @@ export default class Client {
         const unitMessages = await Promise.all(messages.map(createUnitMessage));
 
         const unit = {
-          version: conf.testnet ? VERSION_TESTNET : VERSION,
+          version,
           alt: conf.testnet ? ALT_TESTNET : ALT,
           messages: [...unitMessages],
           authors: [],
@@ -125,15 +132,14 @@ export default class Client {
           timestamp: Math.round(Date.now() / 1000),
         };
 
-        const author = { address, authentifiers: {} };
+        const author = { address, authentifiers: bWithKeys ? path : {} }; // we temporarily place the path there to have its length counted
         if (isDefinitionRequired) {
           author.definition = definition;
         }
-
         unit.authors.push(author);
 
-        const headersCommission = getHeadersSize(unit);
-        const payloadCommission = getTotalPayloadSize(unit);
+        const headersCommission = getHeadersSize(unit, bWithKeys);
+        const payloadCommission = getTotalPayloadSize(unit, bWithKeys);
 
         unitMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
         unitMessages[0].payload.outputs.sort(sortOutputs);
