@@ -1,4 +1,4 @@
-import { Client } from '..';
+import { Client } from '../src';
 
 describe('Client', () => {
   let client = null;
