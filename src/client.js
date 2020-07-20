@@ -141,7 +141,14 @@ export default class Client {
         const headersCommission = getHeadersSize(unit, bWithKeys);
         const payloadCommission = getTotalPayloadSize(unit, bWithKeys);
 
-        unitMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
+        for (let i = 0; i < unitMessages[0].payload.outputs.length; i += 1) {
+          if (unitMessages[0].payload.outputs[i].address === address) {
+            // it's change output
+            unitMessages[0].payload.outputs[i].amount -= headersCommission + payloadCommission;
+            break;
+          }
+        }
+
         unitMessages[0].payload.outputs.sort(sortOutputs);
         unitMessages[0].payload_hash = getBase64Hash(unitMessages[0].payload, bJsonBased);
 
