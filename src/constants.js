@@ -5,3 +5,6 @@ export const VERSION_WITHOUT_KEY_SIZES = '2.0';
 export const ALT = '1';
 export const ALT_TESTNET = '2';
 export const KEY_SIZE_UPGRADE_MCI = 5530000;
+export const HEARTBEAT_TIMEOUT = 10*1000;
+export const HEARTBEAT_RESPONSE_TIMEOUT = 60*1000;
+export const HEARTBEAT_PAUSE_TIMEOUT = 2*HEARTBEAT_TIMEOUT;
