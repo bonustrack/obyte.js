@@ -76,6 +76,8 @@ export default class WSClient {
           const error = message[1].response ? message[1].response.error || null : null;
           const result = error ? null : message[1].response || null;
           this.queue[tag](error, result);
+          // cleanup
+          delete this.queue[tag];
         } else {
           this.notifications(null, message);
         }
