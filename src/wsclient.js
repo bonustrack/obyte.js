@@ -156,14 +156,14 @@ export default class WSClient {
     this.send(['request', request]);
   }
 
-  respond(command, tag, data) {
-    const response = { command, tag, data };
-    response.data = typeof data === 'undefined' ? response.data : null;
-    this.send(['response', response]);
+  respond(command, tag, message) {
+    const respond = { command, tag };
+    if (typeof message !== 'undefined') respond.response = message;
+    this.send(['response', respond]);
   }
 
-  error(command, tag, error) {
-    this.respond(command, tag, { error });
+  error(command, tag, message) {
+    this.respond(command, tag, { error: message });
   }
 
   justsaying(subject, body) {
