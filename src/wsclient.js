@@ -40,30 +40,35 @@ export default class WSClient {
         const message = JSON.parse(payload.data);
         if (!message || !Array.isArray(message) || message.length !== 2) return;
         const type = message[0];
-        const tag = message[1].tag;
+        const { tag } = message[1];
         if (type === 'request' && tag) {
-          const command = message[1].command;
+          const { command } = message[1];
           if (command === 'heartbeat') {
-              // true if our timers were paused
-              // Happens only on android, which suspends timers when the app becomes paused but still keeps network connections
-              // Handling 'pause' event would've been more straightforward but with preference KeepRunning=false, the event is delayed till resume
-              if (Date.now() - last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT) {
-                // opt out of receiving heartbeats and move the connection into a sleeping state
-                return this.respond(command, tag, 'sleep');
-              }
-              // response with acknowledge
-              return this.respond(command, tag);
+            // true if our timers were paused
+            // Happens only on android, which suspends timers when the app becomes paused but still keeps network connections
+            // Handling 'pause' event would've been more straightforward but with preference KeepRunning=false, the event is delayed till resume
+            if (Date.now() - this.last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT) {
+              // opt out of receiving heartbeats and move the connection into a sleeping state
+              this.respond(command, tag, 'sleep');
+              return;
+            }
+            // response with acknowledge
+            this.respond(command, tag);
+            return;
+            // eslint-disable-next-line no-else-return
           } else if (command === 'subscribe') {
-            return this.error(command, tag, "I'm light, cannot subscribe you to updates");
+            this.error(command, tag, "I'm light, cannot subscribe you to updates");
+            return;
           } else if (command.startsWith('light/')) {
-            return this.error(command, tag, "I'm light myself, can't serve you");
+            this.error(command, tag, "I'm light myself, can't serve you");
+            return;
           } else if (command.startsWith('hub/')) {
-            return this.error(command, tag, "I'm not a hub");
+            this.error(command, tag, "I'm not a hub");
+            return;
           }
-        }
-        else if (type === 'response' && tag) {
-          if (command === 'heartbeat') {
-            delete this.last_sent_heartbeat_ts;
+        } else if (type === 'response' && tag) {
+          if (message[1] === 'heartbeat') {
+            this.last_sent_heartbeat_ts = null;
             return;
           }
         }
@@ -126,16 +131,20 @@ export default class WSClient {
 
   request(command, params, cb) {
     if (command === 'heartbeat') {
-      const bJustResumed = Date.now() - this.last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT;
+      const justResumed = Date.now() - this.last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT;
       this.last_hearbeat_wake_ts = Date.now();
       // don't send heartbeat if connection not open
       if (!this.open) return;
       // don't send heartbeat if received message recently
       if (Date.now() - this.last_ts < HEARTBEAT_TIMEOUT) return;
       // close connection if resuming, but never got response to last heartbeat request
-      if (bJustResumed && this.last_sent_heartbeat_ts) return this.close();
+      if (justResumed && this.last_sent_heartbeat_ts) {
+        this.close();
+        return;
+      }
       // don't send heartbeat if waiting response for heartbeat request
-      if (this.last_sent_heartbeat_ts && Date.now() - this.last_sent_heartbeat_ts < HEARTBEAT_RESPONSE_TIMEOUT) return;
+      const requestTimeout = Date.now() - this.last_sent_heartbeat_ts < HEARTBEAT_RESPONSE_TIMEOUT;
+      if (this.last_sent_heartbeat_ts && requestTimeout) return;
       this.last_sent_heartbeat_ts = Date.now();
     }
     const request = { command };
@@ -147,9 +156,9 @@ export default class WSClient {
     this.send(['request', request]);
   }
 
-  respond(command, tag, response) {
-    if (typeof response === 'undefined') response = null;
-    const response = { command, tag, response };
+  respond(command, tag, data) {
+    const response = { command, tag, data };
+    response.data = typeof data === 'undefined' ? response.data : null;
     this.send(['response', response]);
   }
 
