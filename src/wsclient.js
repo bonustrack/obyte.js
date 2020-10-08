@@ -41,6 +41,7 @@ export default class WSClient {
         if (!message || !Array.isArray(message) || message.length !== 2) return;
         const type = message[0];
         const { tag } = message[1];
+        // handle certain requests and responses
         if (type === 'request' && tag) {
           const { command } = message[1];
           if (command === 'heartbeat') {
@@ -66,18 +67,19 @@ export default class WSClient {
             this.error(command, tag, "I'm not a hub");
             return;
           }
-        } else if (type === 'response' && tag) {
+        } else if (type === 'response' && tag && this.queue[tag]) {
           if (message[1].command === 'heartbeat') {
             this.last_sent_heartbeat_ts = null;
+            delete this.queue[tag]; // cleanup
             return;
           }
         }
-        if (this.queue[tag]) {
+        // handle everything else
+        if (tag && this.queue[tag]) {
           const error = message[1].response ? message[1].response.error || null : null;
           const result = error ? null : message[1].response || null;
           this.queue[tag](error, result);
-          // cleanup
-          delete this.queue[tag];
+          delete this.queue[tag]; // cleanup
         } else {
           this.notifications(null, message);
         }
