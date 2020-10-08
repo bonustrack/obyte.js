@@ -67,7 +67,7 @@ export default class WSClient {
             return;
           }
         } else if (type === 'response' && tag) {
-          if (message[1] === 'heartbeat') {
+          if (message[1].command === 'heartbeat') {
             this.last_sent_heartbeat_ts = null;
             return;
           }
