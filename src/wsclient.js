@@ -142,15 +142,15 @@ export default class WSClient {
       if (!this.open) return;
       // don't send heartbeat if received message recently
       if (Date.now() - this.last_ts < HEARTBEAT_TIMEOUT) return;
-
-      if (this.last_sent_heartbeat_ts) {
+      // check if heartbeat is not timed out if not resuming
+      // opposite of "if (!this.last_sent_heartbeat_ts || justResumed)"
+      // same as "if (!(!this.last_sent_heartbeat_ts || justResumed))"
+      if (this.last_sent_heartbeat_ts && !justResumed) {
         // don't send heartbeat if waiting response for heartbeat request
         if (Date.now() - this.last_sent_heartbeat_ts < HEARTBEAT_RESPONSE_TIMEOUT) return;
-        // close connection if heartbeat response timed out and not was not paused
-        if (!justResumed) {
-          this.close();
-          return;
-        }
+        // close connection when didn't get heartbeat response
+        this.close();
+        return;
       }
       this.last_sent_heartbeat_ts = Date.now();
     }
