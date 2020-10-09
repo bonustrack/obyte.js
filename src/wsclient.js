@@ -27,16 +27,16 @@ export default class WSClient {
     this.open = false;
     this.shouldClose = false;
     this.queue = {};
-    this.last_ts = Date.now();
-    this.last_hearbeat_wake_ts = Date.now();
-    this.last_sent_heartbeat_ts = null;
+    this.lastTimestamp = Date.now();
+    this.lastWakeTimestamp = Date.now();
+    this.lastSentTimestamp = null;
     this.notifications = () => {};
     this.onConnectCallback = () => {};
     this.connect = () => {
       const ws = new WebSocket(address);
 
       ws.addEventListener('message', payload => {
-        this.last_ts = Date.now();
+        this.lastTimestamp = Date.now();
         const message = JSON.parse(payload.data);
         if (!message || !Array.isArray(message) || message.length !== 2) return;
         const type = message[0];
@@ -48,7 +48,7 @@ export default class WSClient {
             // true if our timers were paused
             // Happens only on android, which suspends timers when the app becomes paused but still keeps network connections
             // Handling 'pause' event would've been more straightforward but with preference KeepRunning=false, the event is delayed till resume
-            if (Date.now() - this.last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT) {
+            if (Date.now() - this.lastWakeTimestamp > HEARTBEAT_PAUSE_TIMEOUT) {
               // opt out of receiving heartbeats and move the connection into a sleeping state
               this.respond(command, tag, 'sleep');
               return;
@@ -69,7 +69,7 @@ export default class WSClient {
           }
         } else if (type === 'response' && tag && this.queue[tag]) {
           if (message[1].command === 'heartbeat') {
-            this.last_sent_heartbeat_ts = null;
+            this.lastSentTimestamp = null;
             delete this.queue[tag]; // cleanup
             return;
           }
@@ -87,7 +87,7 @@ export default class WSClient {
       });
 
       ws.addEventListener('open', () => {
-        this.last_ts = Date.now();
+        this.lastTimestamp = Date.now();
         if (this.shouldClose) {
           this.ws.close();
           this.shouldClose = false;
@@ -136,23 +136,23 @@ export default class WSClient {
 
   request(command, params, cb) {
     if (command === 'heartbeat') {
-      const justResumed = Date.now() - this.last_hearbeat_wake_ts > HEARTBEAT_PAUSE_TIMEOUT;
-      this.last_hearbeat_wake_ts = Date.now();
+      const justResumed = Date.now() - this.lastWakeTimestamp > HEARTBEAT_PAUSE_TIMEOUT;
+      this.lastWakeTimestamp = Date.now();
       // don't send heartbeat if connection not open
       if (!this.open) return;
       // don't send heartbeat if received message recently
-      if (Date.now() - this.last_ts < HEARTBEAT_TIMEOUT) return;
+      if (Date.now() - this.lastTimestamp < HEARTBEAT_TIMEOUT) return;
       // check if heartbeat is not timed out if not resuming
-      // opposite of "if (!this.last_sent_heartbeat_ts || justResumed)"
-      // same as "if (!(!this.last_sent_heartbeat_ts || justResumed))"
-      if (this.last_sent_heartbeat_ts && !justResumed) {
+      // opposite of "if (!this.lastSentTimestamp || justResumed)"
+      // same as "if (!(!this.lastSentTimestamp || justResumed))"
+      if (this.lastSentTimestamp && !justResumed) {
         // don't send heartbeat if waiting response for heartbeat request
-        if (Date.now() - this.last_sent_heartbeat_ts < HEARTBEAT_RESPONSE_TIMEOUT) return;
+        if (Date.now() - this.lastSentTimestamp < HEARTBEAT_RESPONSE_TIMEOUT) return;
         // close connection when didn't get heartbeat response
         this.close();
         return;
       }
-      this.last_sent_heartbeat_ts = Date.now();
+      this.lastSentTimestamp = Date.now();
     }
     const request = { command };
     if (params) request.params = params;
