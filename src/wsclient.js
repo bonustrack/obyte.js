@@ -78,8 +78,9 @@ export default class WSClient {
         if (tag && this.queue[tag]) {
           const error = message[1].response ? message[1].response.error || null : null;
           const result = error ? null : message[1].response || null;
-          this.queue[tag](error, result);
+          const callback = this.queue[tag];
           delete this.queue[tag]; // cleanup
+          callback(error, result);
         } else {
           this.notifications(null, message);
         }
