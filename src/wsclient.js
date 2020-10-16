@@ -70,8 +70,6 @@ export default class WSClient {
         } else if (type === 'response' && tag && this.queue[tag]) {
           if (message[1].command === 'heartbeat') {
             this.lastSentTimestamp = null;
-            delete this.queue[tag]; // cleanup
-            return;
           }
         }
         // handle everything else
