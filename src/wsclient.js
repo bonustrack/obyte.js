@@ -163,7 +163,7 @@ export default class WSClient {
 
   respond(command, tag, message) {
     const respond = { command, tag };
-    if (typeof message !== 'undefined') respond['response'] = message;
+    if (typeof message !== 'undefined') respond.response = message;
     this.send(['response', respond]);
   }
 
