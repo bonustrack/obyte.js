@@ -417,3 +417,28 @@ export function getUnitHash(objUnit) {
   objStrippedUnit.timestamp = objUnit.timestamp;
   return getBase64Hash(objStrippedUnit, true);
 }
+
+export function isNonemptyArray(arr) {
+  return Array.isArray(arr) && arr.length > 0;
+}
+
+export function isArrayOfLength(arr, len) {
+  return Array.isArray(arr) && arr.length === len;
+}
+
+export function isNonemptyObject(obj) {
+  return obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length > 0;
+}
+
+/**
+ * True if there is at least one field in obj that is not in arrFields.
+ */
+export function hasFieldsExcept(obj, arrFields) {
+  let exists = false;
+  Object.keys(obj).forEach(field => {
+    if (arrFields.indexOf(field) === -1) {
+      exists = true;
+    }
+  });
+  return exists;
+}
