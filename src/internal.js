@@ -93,6 +93,12 @@ export const sign = (hash, privKey) => {
   return res.signature.toString('base64');
 };
 
+export const verify = (hash, signature, pubKey) => {
+  const sigBuf = typeof signature === 'string' ? Buffer.from(signature, 'base64') : signature;
+  const pubKeyBuf = typeof pubKey === 'string' ? Buffer.from(pubKey, 'base64') : pubKey;
+  return ecdsa.verify(hash, sigBuf, pubKeyBuf);
+};
+
 function buffer2bin(buf) {
   const bytes = [];
   for (let i = 0; i < buf.length; i += 1) {
@@ -393,6 +399,16 @@ export function getUnitHashToSign(objUnit) {
     .digest();
 }
 
+export function getSignedPackageHashToSign(signedPackage) {
+  const unsignedPackage = JSON.parse(JSON.stringify(signedPackage));
+  for (let i = 0; i < unsignedPackage.authors.length; i += 1)
+    delete unsignedPackage.authors[i].authentifiers;
+  const sourceString = getJsonSourceString(unsignedPackage);
+  return createHash('sha256')
+    .update(sourceString, 'utf8')
+    .digest();
+}
+
 function getUnitContentHash(objUnit) {
   return getBase64Hash(getNakedUnit(objUnit), true);
 }
@@ -420,10 +436,6 @@ export function getUnitHash(objUnit) {
 
 export function isNonemptyArray(arr) {
   return Array.isArray(arr) && arr.length > 0;
-}
-
-export function isArrayOfLength(arr, len) {
-  return Array.isArray(arr) && arr.length === len;
 }
 
 export function isNonemptyObject(obj) {
