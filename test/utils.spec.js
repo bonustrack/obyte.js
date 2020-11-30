@@ -49,7 +49,16 @@ describe('utils', () => {
         'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6Iko1R1FDSFFNN1dKR1RJUTI1RkRQUjRRS0RHQ0FESkdUIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTFGVkY0QTJIcHJSRGxjNlZvYlIxWjBvUEF6NXpaQjdQRk1tazZSVUkwN3kifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkZiNERlbmczWHVuSUZ3TytZM0thZ0pyOUg5MUtMN3c1UUk4aFIwN3hwSkorY3BjU0RZbFQwc25sSXNwNDRJUWJiMURHK2NUdzVYSjljbDRCMGxjNDNRPT0ifX1dfQ==',
       );
     });
-    it('should sign message with wif', () => {
+    it('should sign message with wif in object', () => {
+      const wif = '5JHx9t7DSSnYwroYbBFodKLDGZggsgfBpaMFok6VMPPMu49UJgA';
+      const objSignedMessage = utils.signMessage('a', { wif, testnet: false });
+      const signedMessageJson = JSON.stringify(objSignedMessage);
+      const signedMessageBase64 = Buffer.from(signedMessageJson).toString('base64');
+      expect(signedMessageBase64).toEqual(
+        'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6IldQQkk0UUhaR0o0SEZOQVRPTVBNNDJIREg1UURGSlJXIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTE5eGZXOVVBTk9saGo5Y0svMTNCZEpDRWdNSjJsSCtpWXZheXYwRlBMYk4ifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkFHcnRFUzV0ZlE3Wjh2bzZsSGJEd1JDWHBtcVI3WUZoK0tCMGNlYThFSlpTZmJ2b0VLcE5mWTcyMU1QNFZObUsxa1VtaFBhNnZROVhQZkREOUlMTUtRPT0ifX1dfQ==',
+      );
+    });
+    it('should sign message with wif as string', () => {
       const wif = '5JHx9t7DSSnYwroYbBFodKLDGZggsgfBpaMFok6VMPPMu49UJgA';
       const objSignedMessage = utils.signMessage('a', wif);
       const signedMessageJson = JSON.stringify(objSignedMessage);
