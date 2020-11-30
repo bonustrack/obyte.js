@@ -68,7 +68,7 @@ function signMessage(message, options = {}) {
   return objUnit;
 }
 
-function validateSignedMessage(objSignedMessage, address, message) {
+function validateSignedMessage(objSignedMessage, address = null, message = null) {
   // https://github.com/byteball/aa-channels-lib/blob/master/modules/signed_message.js
   if (typeof objSignedMessage !== 'object') return false;
   if (

@@ -78,6 +78,24 @@ describe('utils', () => {
       expect(
         utils.validateSignedMessage(objSignedMessage, 'J5GQCHQM7WJGTIQ25FDPR4QKDGCADJGT', 'a'),
       ).toEqual(true);
+      expect(
+        utils.validateSignedMessage(objSignedMessage, 'J5GQCHQM7WJGTIQ25FDPR4QKDGCADJGT'),
+      ).toEqual(true);
+      expect(utils.validateSignedMessage(objSignedMessage, null, 'a')).toEqual(true);
+      expect(utils.validateSignedMessage(objSignedMessage)).toEqual(true);
+    });
+    it('should not validate signed message', () => {
+      const signedMessageBase64 =
+        'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6Iko1R1FDSFFNN1dKR1RJUTI1RkRQUjRRS0RHQ0FESkdUIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTFGVkY0QTJIcHJSRGxjNlZvYlIxWjBvUEF6NXpaQjdQRk1tazZSVUkwN3kifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkZiNERlbmczWHVuSUZ3TytZM0thZ0pyOUg5MUtMN3c1UUk4aFIwN3hwSkorY3BjU0RZbFQwc25sSXNwNDRJUWJiMURHK2NUdzVYSjljbDRCMGxjNDNRPT0ifX1dfQ==';
+      const signedMessageJson = Buffer.from(signedMessageBase64, 'base64').toString('utf8');
+      const objSignedMessage = JSON.parse(signedMessageJson);
+      expect(
+        utils.validateSignedMessage(objSignedMessage, 'KSCCYOEMOMUMJXROLK4HWLTJBWFXICRB', 'a'),
+      ).toEqual(false);
+      expect(
+        utils.validateSignedMessage(objSignedMessage, 'KSCCYOEMOMUMJXROLK4HWLTJBWFXICRB'),
+      ).toEqual(false);
+      expect(utils.validateSignedMessage(objSignedMessage, null, 'b')).toEqual(false);
     });
     it('should not validate signed message without definition', () => {
       const signedMessageBase64 =
