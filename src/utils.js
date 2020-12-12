@@ -5,8 +5,13 @@ import {
   isChashValid,
   getJsonSourceString,
   getUnitHashToSign,
+  getSignedPackageHashToSign,
   sign,
+  verify,
   toPublicKey,
+  isNonemptyArray,
+  isNonemptyObject,
+  hasFieldsExcept,
 } from './internal';
 import { VERSION, VERSION_TESTNET } from './constants';
 
@@ -63,10 +68,61 @@ function signMessage(message, options = {}) {
   return objUnit;
 }
 
+function validateSignedMessage(objSignedMessage, address = null, message = null) {
+  // https://github.com/byteball/aa-channels-lib/blob/master/modules/signed_message.js
+  if (typeof objSignedMessage !== 'object') return false;
+  if (
+    hasFieldsExcept(objSignedMessage, [
+      'signed_message',
+      'authors',
+      'last_ball_unit',
+      'timestamp',
+      'version',
+    ])
+  )
+    return false;
+  if (!('signed_message' in objSignedMessage)) return false;
+  if (message && message !== objSignedMessage.signed_message) return false;
+  if (
+    'version' in objSignedMessage &&
+    !(VERSION === objSignedMessage.version || VERSION_TESTNET === objSignedMessage.version)
+  )
+    return false;
+  const { authors } = objSignedMessage;
+  if (!isNonemptyArray(authors)) return false;
+  if (authors.length > 1) return false;
+  const objAuthor = authors[0];
+  if (hasFieldsExcept(objAuthor, ['address', 'definition', 'authentifiers'])) return false;
+  if (!isValidAddress(objAuthor.address)) return false;
+  if (address && address !== objAuthor.address) return false;
+  if (!isNonemptyObject(objAuthor.authentifiers)) return false;
+  const bHasDefinition = 'definition' in objAuthor;
+  if (!bHasDefinition) return false;
+  const { definition } = objAuthor;
+  if (!Array.isArray(definition)) return false;
+  if (definition[0] !== 'sig') return false;
+  if (typeof definition[1] !== 'object') return false;
+  try {
+    if (getChash160(definition) !== objAuthor.address) return false;
+  } catch (e) {
+    return false;
+  }
+  let unitHashToSign;
+  try {
+    unitHashToSign = getSignedPackageHashToSign(objSignedMessage);
+  } catch (e) {
+    return false;
+  }
+  const signature = objAuthor.authentifiers.r;
+  if (!signature) return false;
+  return verify(unitHashToSign, signature, definition[1].pubkey);
+}
+
 export default {
   getChash160,
   toWif,
   fromWif,
   isValidAddress,
   signMessage,
+  validateSignedMessage,
 };
