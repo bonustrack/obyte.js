@@ -86,6 +86,8 @@ export default class WSClient {
 
       ws.addEventListener('open', () => {
         this.lastTimestamp = Date.now();
+        this.lastWakeTimestamp = Date.now();
+        this.lastSentTimestamp = null;
         if (this.shouldClose) {
           this.ws.close();
           this.shouldClose = false;
