@@ -13,6 +13,7 @@ if (typeof window !== 'undefined') {
 
 const wait = (ws, cb) => {
   setTimeout(() => {
+    if (ws.readyState === 2 || ws.readyState === 3) return; // closed
     if (ws.readyState === 1) {
       if (cb !== null) cb();
     } else {
