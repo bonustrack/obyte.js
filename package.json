@@ -1,6 +1,6 @@
 {
   "name": "obyte",
-  "version": "0.1.7",
+  "version": "0.1.13",
   "description": "A pure and powerful JavaScript Obyte library",
   "homepage": "https://obytejs.com",
   "browser": "dist/obyte.min.js",

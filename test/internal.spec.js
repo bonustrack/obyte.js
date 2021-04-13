@@ -1,5 +1,12 @@
 import crypto from 'crypto';
-import { camelCase, repeatString, sortOutputs, mapAPI, sign, toPublicKey } from '../src/internal';
+import {
+  camelCase,
+  sortOutputs,
+  mapAPI,
+  sign,
+  toPublicKey,
+  hasFieldsExcept,
+} from '../src/internal';
 
 describe('internal', () => {
   describe('camelCase', () => {
@@ -12,15 +19,6 @@ describe('internal', () => {
     it('should handle method names with prefix', () => {
       expect(camelCase('light/load')).toEqual('load');
       expect(camelCase('hub/get_interesting_data')).toEqual('getInterestingData');
-    });
-  });
-
-  describe('repeatString', () => {
-    it('should repeat string', () => {
-      expect(repeatString('hey', 1)).toEqual('hey');
-      expect(repeatString('hello', 3)).toEqual('hellohellohello');
-
-      expect(repeatString(5, 2)).toEqual('55');
     });
   });
 
@@ -148,6 +146,26 @@ describe('internal', () => {
       const privKeyBuf = Buffer.from(privKey, 'base64');
 
       expect(toPublicKey(privKeyBuf)).toEqual('A19xfW9UANOlhj9cK/13BdJCEgMJ2lH+iYvayv0FPLbN');
+    });
+  });
+
+  describe('hasFieldsExcept', () => {
+    it('happy path', () => {
+      expect(hasFieldsExcept({ foo: 1 }, [])).toEqual(true);
+      expect(hasFieldsExcept({ foo: 1 }, ['bar'])).toEqual(true);
+    });
+
+    it('empty obj', () => {
+      expect(hasFieldsExcept({}, [])).toEqual(false);
+      expect(hasFieldsExcept({}, ['foo'])).toEqual(false);
+    });
+
+    it('single fail', () => {
+      expect(hasFieldsExcept({ foo: 1 }, ['foo'])).toEqual(false);
+    });
+
+    it('mixed bag', () => {
+      expect(hasFieldsExcept({ foo: 1, bar: 2 }, ['bar', 'baz'])).toEqual(true);
     });
   });
 });

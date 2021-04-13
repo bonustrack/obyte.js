@@ -6,10 +6,10 @@ import {
   VERSION_TESTNET,
   ALT,
   ALT_TESTNET,
-  VERSION_WITHOUT_TIMESTAMP,
+  VERSION_WITHOUT_KEY_SIZES,
+  KEY_SIZE_UPGRADE_MCI,
 } from './constants';
 import {
-  repeatString,
   createPaymentMessage,
   sortOutputs,
   mapAPI,
@@ -20,6 +20,7 @@ import {
   getBase64Hash,
   getUnitHashToSign,
   getUnitHash,
+  getLength,
 } from './internal';
 import api from './api.json';
 import apps from './apps.json';
@@ -45,6 +46,15 @@ export default class Client {
 
     this.compose = {
       async message(app, payload, options = {}) {
+        const messages = app === 'multi' ? payload : [{ app, payload }];
+
+        messages.sort(a => {
+          return a.app === 'payment' && !a.payload.asset ? -1 : 1; // we place byte payment message first
+        });
+        if (messages[0].app !== 'payment' || messages[0].payload.asset)
+          // if no byte payment, we add one
+          messages.unshift({ app: 'payment', payload: { outputs: [] } });
+
         let isDefinitionRequired = false;
         const conf =
           typeof options === 'object'
@@ -55,14 +65,20 @@ export default class Client {
         const definition = conf.definition || ['sig', { pubkey }];
         const address = conf.address || utils.getChash160(definition);
         const path = conf.path || 'r';
-        const version = conf.testnet ? VERSION_TESTNET : VERSION;
-        const bJsonBased = version !== VERSION_WITHOUT_TIMESTAMP;
 
         const witnesses = await self.getCachedWitnesses();
         const [lightProps, objDefinition] = await Promise.all([
           self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
           self.api.getDefinitionForAddress({ address }),
         ]);
+        const bWithKeys =
+          conf.testnet || lightProps.last_stable_mc_ball_mci >= KEY_SIZE_UPGRADE_MCI;
+        let version;
+        if (conf.testnet) version = VERSION_TESTNET;
+        else if (bWithKeys) version = VERSION;
+        else version = VERSION_WITHOUT_KEY_SIZES;
+        const bJsonBased = true;
+
         if (!objDefinition.definition && objDefinition.is_stable) {
           isDefinitionRequired = true;
         } else if (!objDefinition.is_stable)
@@ -75,37 +91,39 @@ export default class Client {
             `Definition chash of address doesn't match the definition chash provided`,
           );
 
-        const bytePayment = await createPaymentMessage(
-          self,
-          null,
-          app !== 'payment' || payload.asset ? [] : payload.outputs,
-          address,
-        );
-        const customMessages = [bytePayment];
+        const payloadsLength = messages.reduce(
+          (a, b) => a + 78 + getLength(b.app, bWithKeys) + getLength(b.payload, bWithKeys),
+          0,
+        ); // 78 for payload_location and payload_hash
 
-        if (app === 'payment') {
-          if (payload.asset) {
+        async function createUnitMessage(message) {
+          if (message.app === 'payment') {
             const assetPayment = await createPaymentMessage(
               self,
-              payload.asset,
-              payload.outputs,
+              message.payload.asset,
+              message.payload.outputs,
               address,
+              payloadsLength,
+              lightProps.last_stable_mc_ball_mci,
             );
-            customMessages.push(assetPayment);
+            assetPayment.payload.outputs.sort(sortOutputs);
+            assetPayment.payload_hash = getBase64Hash(assetPayment.payload, bJsonBased);
+            return assetPayment;
           }
-        } else {
-          customMessages.push({
-            app,
-            payload_hash: getBase64Hash(payload, bJsonBased),
+          return {
+            app: message.app,
+            payload_hash: getBase64Hash(message.payload, bJsonBased),
             payload_location: 'inline',
-            payload,
-          });
+            payload: message.payload,
+          };
         }
 
+        const unitMessages = await Promise.all(messages.map(createUnitMessage));
+
         const unit = {
-          version: conf.testnet ? VERSION_TESTNET : VERSION,
+          version,
           alt: conf.testnet ? ALT_TESTNET : ALT,
-          messages: [...customMessages],
+          messages: [...unitMessages],
           authors: [],
           parent_units: lightProps.parent_units,
           last_ball: lightProps.last_stable_mc_ball,
@@ -114,34 +132,25 @@ export default class Client {
           timestamp: Math.round(Date.now() / 1000),
         };
 
-        const author = { address, authentifiers: {} };
+        const author = { address, authentifiers: bWithKeys ? path : {} }; // we temporarily place the path there to have its length counted
         if (isDefinitionRequired) {
           author.definition = definition;
         }
-
-        const assocSigningPaths = {};
-        const assocLengthsBySigningPaths = { r: 88 };
-        const arrSigningPaths = Object.keys(assocLengthsBySigningPaths);
-        assocSigningPaths[address] = arrSigningPaths;
-        for (let j = 0; j < arrSigningPaths.length; j += 1) {
-          author.authentifiers[arrSigningPaths[j]] = repeatString(
-            '-',
-            assocLengthsBySigningPaths[arrSigningPaths[j]],
-          );
-        }
         unit.authors.push(author);
 
-        const headersCommission = getHeadersSize(unit);
-        const payloadCommission = getTotalPayloadSize(unit);
+        const headersCommission = getHeadersSize(unit, bWithKeys);
+        const payloadCommission = getTotalPayloadSize(unit, bWithKeys);
 
-        customMessages[0].payload.outputs[0].amount -= headersCommission + payloadCommission;
-        customMessages[0].payload.outputs.sort(sortOutputs);
-        customMessages[0].payload_hash = getBase64Hash(customMessages[0].payload, bJsonBased);
-
-        if (payload.asset) {
-          customMessages[1].payload.outputs.sort(sortOutputs);
-          customMessages[1].payload_hash = getBase64Hash(customMessages[1].payload, bJsonBased);
+        for (let i = 0; i < unitMessages[0].payload.outputs.length; i += 1) {
+          if (unitMessages[0].payload.outputs[i].address === address) {
+            // it's change output
+            unitMessages[0].payload.outputs[i].amount -= headersCommission + payloadCommission;
+            break;
+          }
         }
+
+        unitMessages[0].payload.outputs.sort(sortOutputs);
+        unitMessages[0].payload_hash = getBase64Hash(unitMessages[0].payload, bJsonBased);
 
         unit.headers_commission = headersCommission;
         unit.payload_commission = payloadCommission;
@@ -150,7 +159,7 @@ export default class Client {
         unit.authors[0].authentifiers = {};
         unit.authors[0].authentifiers[path] = sign(textToSign, privKeyBuf);
 
-        unit.messages = [...customMessages];
+        unit.messages = [...unitMessages];
         unit.unit = getUnitHash(unit);
 
         return unit;

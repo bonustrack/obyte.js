@@ -1,9 +1,10 @@
 import ecdsa from 'secp256k1';
 import createHash from 'create-hash';
 import base32 from 'thirty-two';
-import { VERSION_WITHOUT_TIMESTAMP } from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
+const PARENT_UNITS_KEY_SIZE = 'parent_units'.length;
+const SIGNATURE_SIZE = 88;
 const PI = '14159265358979323846264338327950288419716939937510';
 const STRING_JOIN_CHAR = '\x00';
 const ZERO_STRING = '00000000';
@@ -18,16 +19,21 @@ export const camelCase = input =>
     .join('')
     .replace(/^\w/, c => c.toLowerCase());
 
-export const repeatString = (str, times) =>
-  str.repeat ? str.repeat(times) : new Array(times + 1).join(str);
-
-export async function createPaymentMessage(client, asset, outputs, address) {
+export async function createPaymentMessage(
+  client,
+  asset,
+  outputs,
+  address,
+  payloadLength,
+  lastBallMci,
+) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  const targetAmount = asset ? amount : 1000 + amount;
+  const targetAmount = asset ? amount : 700 + payloadLength + amount;
+
   const coinsForAmount = await client.api.pickDivisibleCoinsForAmount({
     addresses: [address],
-    last_ball_mci: 1000000000000000,
+    last_ball_mci: lastBallMci,
     amount: targetAmount,
     spend_unconfirmed: 'own',
     asset,
@@ -42,6 +48,9 @@ export async function createPaymentMessage(client, asset, outputs, address) {
 
   if (asset) {
     payload.asset = asset;
+    if (payload.outputs[0].amount === 0)
+      // amount 0 output is not valid
+      payload.outputs = payload.outputs.slice(1);
   }
 
   return {
@@ -84,6 +93,12 @@ export const sign = (hash, privKey) => {
   return res.signature.toString('base64');
 };
 
+export const verify = (hash, signature, pubKey) => {
+  const sigBuf = typeof signature === 'string' ? Buffer.from(signature, 'base64') : signature;
+  const pubKeyBuf = typeof pubKey === 'string' ? Buffer.from(pubKey, 'base64') : pubKey;
+  return ecdsa.verify(hash, sigBuf, pubKeyBuf);
+};
+
 function buffer2bin(buf) {
   const bytes = [];
   for (let i = 0; i < buf.length; i += 1) {
@@ -121,7 +136,6 @@ function getNakedUnit(objUnit) {
   delete objNakedUnit.headers_commission;
   delete objNakedUnit.payload_commission;
   delete objNakedUnit.main_chain_index;
-  if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objNakedUnit.timestamp;
 
   if (objNakedUnit.messages) {
     for (let i = 0; i < objNakedUnit.messages.length; i += 1) {
@@ -316,7 +330,7 @@ export function chashGetChash160(data) {
 
 export const toPublicKey = privKey => ecdsa.publicKeyCreate(privKey).toString('base64');
 
-function getLength(value) {
+export function getLength(value, bWithKeys) {
   if (value === null) return 0;
   switch (typeof value) {
     case 'string':
@@ -327,13 +341,14 @@ function getLength(value) {
       let len = 0;
       if (Array.isArray(value)) {
         value.forEach(element => {
-          len += getLength(element);
+          len += getLength(element, bWithKeys);
         });
       } else {
         Object.keys(value).forEach(key => {
           if (typeof value[key] === 'undefined')
             throw Error(`undefined at ${key} of ${JSON.stringify(value)}`);
-          len += getLength(value[key]);
+          if (bWithKeys) len += key.length;
+          len += getLength(value[key], bWithKeys);
         });
       }
       return len;
@@ -345,22 +360,26 @@ function getLength(value) {
   }
 }
 
-export function getHeadersSize(objUnit) {
+export function getHeadersSize(objUnit, bWithKeys) {
   if (objUnit.content_hash) throw Error('trying to get headers size of stripped unit');
   const objHeader = JSON.parse(JSON.stringify(objUnit));
   delete objHeader.unit;
   delete objHeader.headers_commission;
   delete objHeader.payload_commission;
   delete objHeader.main_chain_index;
-  if (objUnit.version === VERSION_WITHOUT_TIMESTAMP) delete objHeader.timestamp;
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
-  return getLength(objHeader) + PARENT_UNITS_SIZE;
+  return (
+    getLength(objHeader, bWithKeys) +
+    PARENT_UNITS_SIZE +
+    (bWithKeys ? PARENT_UNITS_KEY_SIZE : 0) +
+    SIGNATURE_SIZE
+  ); // unit is always single authored thus only has 1 signature in authentifiers
 }
 
-export function getTotalPayloadSize(objUnit) {
+export function getTotalPayloadSize(objUnit, bWithKeys) {
   if (objUnit.content_hash) throw Error('trying to get payload size of stripped unit');
-  return getLength(objUnit.messages);
+  return getLength({ messages: objUnit.messages }, bWithKeys);
 }
 
 export function getBase64Hash(obj, bJsonBased) {
@@ -374,24 +393,30 @@ export function getUnitHashToSign(objUnit) {
   const objNakedUnit = getNakedUnit(objUnit);
   for (let i = 0; i < objNakedUnit.authors.length; i += 1)
     delete objNakedUnit.authors[i].authentifiers;
-  const sourceString =
-    objUnit.version === VERSION_WITHOUT_TIMESTAMP
-      ? getSourceString(objNakedUnit)
-      : getJsonSourceString(objNakedUnit);
+  const sourceString = getJsonSourceString(objNakedUnit);
+  return createHash('sha256')
+    .update(sourceString, 'utf8')
+    .digest();
+}
+
+export function getSignedPackageHashToSign(signedPackage) {
+  const unsignedPackage = JSON.parse(JSON.stringify(signedPackage));
+  for (let i = 0; i < unsignedPackage.authors.length; i += 1)
+    delete unsignedPackage.authors[i].authentifiers;
+  const sourceString = getJsonSourceString(unsignedPackage);
   return createHash('sha256')
     .update(sourceString, 'utf8')
     .digest();
 }
 
 function getUnitContentHash(objUnit) {
-  return getBase64Hash(getNakedUnit(objUnit), objUnit.version !== VERSION_WITHOUT_TIMESTAMP);
+  return getBase64Hash(getNakedUnit(objUnit), true);
 }
 
 export function getUnitHash(objUnit) {
-  const bVersion2 = objUnit.version !== VERSION_WITHOUT_TIMESTAMP;
   if (objUnit.content_hash)
     // already stripped
-    return getBase64Hash(getNakedUnit(objUnit), bVersion2);
+    return getBase64Hash(getNakedUnit(objUnit), true);
   const objStrippedUnit = {
     content_hash: getUnitContentHash(objUnit),
     version: objUnit.version,
@@ -405,6 +430,27 @@ export function getUnitHash(objUnit) {
     objStrippedUnit.last_ball = objUnit.last_ball;
     objStrippedUnit.last_ball_unit = objUnit.last_ball_unit;
   }
-  if (bVersion2) objStrippedUnit.timestamp = objUnit.timestamp;
-  return getBase64Hash(objStrippedUnit, bVersion2);
+  objStrippedUnit.timestamp = objUnit.timestamp;
+  return getBase64Hash(objStrippedUnit, true);
+}
+
+export function isNonemptyArray(arr) {
+  return Array.isArray(arr) && arr.length > 0;
+}
+
+export function isNonemptyObject(obj) {
+  return obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length > 0;
+}
+
+/**
+ * True if there is at least one field in obj that is not in arrFields.
+ */
+export function hasFieldsExcept(obj, arrFields) {
+  let exists = false;
+  Object.keys(obj).forEach(field => {
+    if (arrFields.indexOf(field) === -1) {
+      exists = true;
+    }
+  });
+  return exists;
 }
