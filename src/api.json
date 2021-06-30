@@ -105,6 +105,11 @@
       "aas": "array"
     }
   },
+  "light/get_aa_response_chain": {
+    "params": {
+      "trigger_unit": "string"
+    }
+  },
   "light/get_data_feed": {
     "params": "object"
   },

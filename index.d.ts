@@ -257,6 +257,13 @@ declare namespace Obyte {
         callback?: (err: null | string, result: object[] | any[]) => void,
       ): Promise<object>;
 
+      getAaResponseChain(
+        params: {
+          trigger_unit: string;
+        },
+        callback?: (err: null | string, result: object[] | any[]) => void,
+      ): Promise<object>;
+      
       getDataFeed(
         params: {
           oracles: string[];
