@@ -263,7 +263,16 @@ declare namespace Obyte {
         },
         callback?: (err: null | string, result: object[] | any[]) => void,
       ): Promise<object>;
-      
+
+      executeGetter(
+        params: {
+          address: string;
+          getter: string;
+          args?: any[];
+        },
+        callback?: (err: null | string, result: object) => void,
+      ): Promise<object>;
+
       getDataFeed(
         params: {
           oracles: string[];
