@@ -110,6 +110,13 @@
       "trigger_unit": "string"
     }
   },
+  "light/execute_getter": {
+    "params": {
+      "address": "string",
+      "getter": "string",
+      "args": "array"
+    }
+  },
   "light/get_data_feed": {
     "params": "object"
   },
