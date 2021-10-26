@@ -31,8 +31,8 @@ export default class WSClient {
     this.lastTimestamp = Date.now();
     this.lastWakeTimestamp = Date.now();
     this.lastSentTimestamp = null;
-    this.notifications = () => {};
-    this.onConnectCallback = () => {};
+    this.notifications = [];
+    this.onConnectCallbacks = [];
     this.connect = () => {
       const ws = new WebSocket(address);
 
@@ -81,7 +81,7 @@ export default class WSClient {
           delete this.queue[tag]; // cleanup
           callback(error, result);
         } else {
-          this.notifications(null, message);
+          this.notifications.forEach(n => n(message));
         }
       });
 
@@ -94,7 +94,7 @@ export default class WSClient {
           this.shouldClose = false;
         } else {
           this.open = true;
-          this.onConnectCallback();
+          this.onConnectCallbacks.forEach(cb => cb());
         }
       });
 
@@ -114,11 +114,11 @@ export default class WSClient {
   }
 
   onConnect(cb) {
-    this.onConnectCallback = cb;
+    this.onConnectCallbacks.push(cb);
   }
 
   subscribe(cb) {
-    this.notifications = cb;
+    this.notifications.push(cb);
   }
 
   send(message) {
