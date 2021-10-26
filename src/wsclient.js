@@ -81,7 +81,7 @@ export default class WSClient {
           delete this.queue[tag]; // cleanup
           callback(error, result);
         } else {
-          this.notifications.forEach(n => n(message));
+          this.notifications.forEach(n => n(null, message));
         }
       });
 
