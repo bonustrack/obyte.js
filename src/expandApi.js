@@ -1,5 +1,9 @@
 import utils from './utils';
 
+function getOfficialTokenRegistryAddress() {
+  return 'O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ';
+}
+
 async function getSymbolByAsset(tokenRegistryAddress, asset) {
   if (asset === null || asset === 'base') {
     return 'GBYTE';
@@ -47,4 +51,66 @@ async function getAssetBySymbol(tokenRegistryAddress, symbol) {
   return null;
 }
 
-export default { getSymbolByAsset, getAssetBySymbol };
+async function getDecimalsBySymbolOrAsset(tokenRegistryAddress, symbolOrAsset) {
+  if (!utils.isValidAddress(tokenRegistryAddress)) {
+    throw Error('Not valid tokenRegistryAddress');
+  }
+
+  if (!symbolOrAsset) throw Error('symbolOrAsset is undefined');
+
+  if (typeof symbolOrAsset !== 'string') throw Error('not valid symbolOrAsset');
+
+  if (symbolOrAsset === 'base' || symbolOrAsset === 'GBYTE') {
+    return 9;
+  }
+
+  let asset;
+
+  if (symbolOrAsset.length === 44) {
+    asset = symbolOrAsset;
+  } else if (symbolOrAsset === symbolOrAsset.toUpperCase()) {
+    const aaStateVarsWithPrefix = await this.getAaStateVars({
+      address: tokenRegistryAddress,
+      var_prefix: `s2a_${symbolOrAsset}`,
+    });
+
+    if (!(`s2a_${symbolOrAsset}` in aaStateVarsWithPrefix)) {
+      throw Error(`no such symbol ${symbolOrAsset}`);
+    }
+
+    asset = aaStateVarsWithPrefix[`s2a_${symbolOrAsset}`];
+  } else {
+    throw Error('not valid symbolOrAsset');
+  }
+
+  const aaStateVarsWithPrefix = await this.getAaStateVars({
+    address: tokenRegistryAddress,
+    var_prefix: `current_desc_${asset}`,
+  });
+
+  if (!(`current_desc_${asset}` in aaStateVarsWithPrefix)) {
+    throw Error(`no decimals for ${symbolOrAsset}`);
+  }
+
+  const descHash = aaStateVarsWithPrefix[`current_desc_${asset}`];
+
+  const decimalsStateVar = await this.getAaStateVars({
+    address: tokenRegistryAddress,
+    var_prefix: `decimals_${descHash}`,
+  });
+
+  const decimals = decimalsStateVar[`decimals_${descHash}`];
+
+  if (typeof decimals !== 'number') {
+    throw Error(`no decimals for ${symbolOrAsset}`);
+  } else {
+    return decimals;
+  }
+}
+
+export default {
+  getSymbolByAsset,
+  getAssetBySymbol,
+  getOfficialTokenRegistryAddress,
+  getDecimalsBySymbolOrAsset,
+};
