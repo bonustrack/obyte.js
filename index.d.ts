@@ -322,7 +322,7 @@ declare namespace Obyte {
 
       getAssetBySymbol(tokenRegistryAddress: string, symbol: string): Promise<string>;
 
-      getDecimalsBySymbolOrAsset(tokenRegistryAddress: string, symbolOrAsset: string): Promise<string>;
+      getDecimalsBySymbolOrAsset(tokenRegistryAddress: string, symbolOrAsset: string): Promise<number>;
       
       getOfficialTokenRegistryAddress(): string;
       
