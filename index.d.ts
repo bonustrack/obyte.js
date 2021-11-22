@@ -322,6 +322,10 @@ declare namespace Obyte {
 
       getAssetBySymbol(tokenRegistryAddress: string, symbol: string): Promise<string>;
 
+      getDecimalsBySymbolOrAsset(tokenRegistryAddress: string, symbolOrAsset: string): Promise<number>;
+      
+      getOfficialTokenRegistryAddress(): string;
+      
       // Those require subscriptions
       catchup(params: any): any;
       getHashTree(params: any): any;
