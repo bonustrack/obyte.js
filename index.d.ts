@@ -237,6 +237,7 @@ declare namespace Obyte {
       getAaStateVars(
         params: {
           address: string;
+          var_prefix?: string;
         },
         callback?: (err: null | string, result: string) => void,
       ): Promise<object>;

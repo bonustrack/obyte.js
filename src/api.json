@@ -90,7 +90,8 @@
   },
   "light/get_aa_state_vars": {
     "params": {
-      "address": "string"
+      "address": "string",
+      "var_prefix": "string"
     }
   },
   "light/get_aas_by_base_aas": {
