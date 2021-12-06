@@ -366,4 +366,25 @@ declare namespace Obyte {
       payment(params: any): Promise<string>;
     };
   }
+
+  interface WIFReturn {
+    readonly version: number;
+    readonly privateKey: Buffer;
+    readonly compressed: boolean;
+  }
+
+  interface IObjUnit {
+    version: string;
+    signed_message: any;
+    authors: Array<Author>
+  }
+
+  module utils {
+    function isValidAddress(address: string): boolean;
+    function getChash160(object: object | Array<any>): string;
+    function toWif(privateKey: Buffer, testnet: boolean): string;
+    function fromWif(string: string, testnet: boolean): WIFReturn;
+    function signMessage(message: any, options: object): IObjUnit;
+    function validateSignedMessage(objSignedMessage: object, address: string | null, message: any | null): boolean;
+  }
 }
