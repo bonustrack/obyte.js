@@ -34,6 +34,7 @@ export default class WSClient {
     this.notifications = [];
     this.onConnectCallbacks = [];
     this.connect = () => {
+      this.notifications = [];
       const ws = new WebSocket(address);
 
       ws.addEventListener('message', payload => {
