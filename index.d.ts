@@ -10,6 +10,7 @@ declare namespace Obyte {
     path?: string;
     privateKey?: any;
     reconnect?: boolean;
+    closeIfError?: boolean;
   }
 
   interface Author {

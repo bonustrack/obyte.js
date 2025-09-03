@@ -23,10 +23,11 @@ const wait = (ws, cb) => {
 };
 
 export default class WSClient {
-  constructor(address, reconnect) {
+  constructor(address, reconnect, closeIfError) {
     this.address = address;
     this.open = false;
     this.shouldClose = false;
+    this.closeIfError = closeIfError || false;
     this.queue = {};
     this.lastTimestamp = Date.now();
     this.lastWakeTimestamp = Date.now();
@@ -106,6 +107,13 @@ export default class WSClient {
           setTimeout(() => {
             this.connect();
           }, 1000);
+        }
+      });
+
+      ws.addEventListener('error', err => {
+        if (this.closeIfError) {
+          console.error('WebSocket error', err);
+          this.close();
         }
       });
 
