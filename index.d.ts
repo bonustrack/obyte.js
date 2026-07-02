@@ -13,6 +13,46 @@ declare namespace Obyte {
     closeIfError?: boolean;
   }
 
+  /**
+   * The browser-compatible surface shared by the native `WebSocket` (browser)
+   * and the `ws` package (Node.js) — the two implementations used underneath.
+   */
+  interface WSClientSocket {
+    readonly readyState: number;
+    send(data: string): void;
+    close(): void;
+    addEventListener(
+      type: 'open' | 'message' | 'close' | 'error',
+      listener: (event: any) => void,
+    ): void;
+    removeEventListener(
+      type: 'open' | 'message' | 'close' | 'error',
+      listener: (event: any) => void,
+    ): void;
+  }
+
+  /** Low-level WebSocket client wrapper, exposed on `Client.client`. */
+  interface WSClient {
+    address: string;
+    /** True while the connection is established. */
+    open: boolean;
+    /** Set to false before `close()` to shut a reconnecting client down permanently. */
+    reconnect: boolean;
+    closeIfError: boolean;
+    /** Underlying socket; null while a reconnection is pending. */
+    ws: WSClientSocket | null;
+    connect(): void;
+    onConnect(callback: () => void): void;
+    onError(callback: (err: any) => void): void;
+    subscribe(callback: (err: null | string, result: any) => void): void;
+    request(command: string, params: any, callback: (err: any, result: any) => void): void;
+    send(message: any, onError?: () => void): void;
+    respond(command: string, tag: string, message?: any): void;
+    error(command: string, tag: string, message: any): void;
+    justsaying(subject: string, body?: any): void;
+    close(): void;
+  }
+
   interface Author {
     address: string;
     authentifiers: object;
@@ -118,6 +158,9 @@ declare namespace Obyte {
 
   class Client {
     constructor(nodeAddress?: string, clientOptions?: Options);
+
+    /** Low-level WebSocket client (heartbeats, raw requests, the underlying socket). */
+    client: WSClient;
 
     /**
      * Broadcast a unit.

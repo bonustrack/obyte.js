@@ -1,6 +1,5 @@
 [![npm](https://img.shields.io/npm/v/obyte.svg)](https://www.npmjs.com/package/obyte)
 ![npm](https://img.shields.io/npm/dm/obyte.svg)
-![CircleCI](https://img.shields.io/circleci/project/github/bonustrack/obyte.js.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/bonustrack/obyte.js/master/LICENSE)
 
 # Obyte.js
@@ -49,8 +48,66 @@ const options = { testnet: true };
 const client = new obyte.Client('wss://obyte.org/bb-test', options);
 ```
 
+Available client options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `testnet` | `false` | connect to testnet |
+| `reconnect` | `false` | automatically reconnect (one attempt per second) after the connection drops |
+| `closeIfError` | `false` | close on the first connection error instead of reconnecting |
+
+### Connection lifecycle
+
+`onConnect` fires on every successful connection — including every reconnection when
+`reconnect: true` is set. Notification subscriptions live for a single connection *by
+design*, so register them inside `onConnect` to have them set up again after every
+reconnect:
+
+```js
+const client = new obyte.Client('wss://obyte.org/bb', { reconnect: true });
+
+client.onConnect(function() {
+  // per-connection setup goes here: it runs again after every reconnect
+
+  // hub-side subscriptions are per-connection too: the hub forgets which AAs
+  // this connection watched when it drops, so re-register the watches here
+  client.justsaying('light/new_aa_to_watch', {
+    aa: 'AA_ADDRESS_TO_WATCH',
+  });
+
+  client.subscribe(function(err, result) {
+    console.log('notification:', result);
+  });
+});
+
+// error subscribers persist across reconnections, register them once
+client.onError(function(err) {
+  console.error('connection error:', err);
+});
+
+// the hub drops idle connections, send a heartbeat to keep it alive
+setInterval(function() {
+  client.api.heartbeat();
+}, 10 * 1000);
+```
+
+Unlike `subscribe`, the heartbeat timer belongs *outside* `onConnect`: one timer per
+client, not per connection. Heartbeats are skipped automatically while the connection
+is down (and while there is recent traffic), whereas a timer registered on every
+reconnection would pile up duplicates. Call `clearInterval` once you are done with
+the client.
+
 Close the client:
 ```js
+client.close();
+```
+
+With `reconnect: true` the client treats a closed socket as a dropped connection and
+reconnects even after an intentional `close()`. To close such a client permanently,
+disable reconnection first:
+
+```js
+client.client.reconnect = false;
 client.close();
 ```
 

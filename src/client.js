@@ -54,7 +54,7 @@ export default class Client {
         const messages = app === 'multi' ? payload : [{ app, payload }];
 
         messages.sort(
-          (a) => (a.app === 'payment' && !a.payload.asset ? -1 : 1) // we place byte payment message first
+          (a) => (a.app === 'payment' && !a.payload.asset ? -1 : 1), // we place byte payment message first
         );
         if (messages[0].app !== 'payment' || messages[0].payload.asset)
           // if no byte payment, we add one
