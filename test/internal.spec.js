@@ -6,9 +6,25 @@ import {
   sign,
   toPublicKey,
   hasFieldsExcept,
+  withDefaultRegistry,
 } from '../src/internal';
 
 describe('internal', () => {
+  describe('withDefaultRegistry', () => {
+    const OFFICIAL = 'O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ';
+    it('shifts a single argument onto the value slot', () => {
+      expect(withDefaultRegistry('asset1')).toEqual([OFFICIAL, 'asset1']);
+      expect(withDefaultRegistry(null)).toEqual([OFFICIAL, null]);
+    });
+    it('substitutes a null/undefined registry', () => {
+      expect(withDefaultRegistry(null, 'asset1')).toEqual([OFFICIAL, 'asset1']);
+      expect(withDefaultRegistry(undefined, 'asset1')).toEqual([OFFICIAL, 'asset1']);
+    });
+    it('keeps an explicit registry untouched', () => {
+      expect(withDefaultRegistry('REGISTRY', 'asset1')).toEqual(['REGISTRY', 'asset1']);
+    });
+  });
+
   describe('camelCase', () => {
     it('should convert method names', () => {
       expect(camelCase('load')).toEqual('load');

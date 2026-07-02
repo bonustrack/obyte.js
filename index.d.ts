@@ -554,11 +554,20 @@ declare namespace Obyte {
         callback?: (err: null | string, result: string | null) => void,
       ): Promise<string>;
 
-      getSymbolByAsset(tokenRegistryAddress: string, asset: string): Promise<string>;
+      /** With a single argument (or a null registry) the official token registry is used. */
+      getSymbolByAsset(asset: string | null): Promise<string>;
+      getSymbolByAsset(tokenRegistryAddress: string | null, asset: string | null): Promise<string>;
 
-      getAssetBySymbol(tokenRegistryAddress: string, symbol: string): Promise<string>;
+      /** With a single argument (or a null registry) the official token registry is used. */
+      getAssetBySymbol(symbol: string): Promise<string | null>;
+      getAssetBySymbol(tokenRegistryAddress: string | null, symbol: string): Promise<string | null>;
 
-      getDecimalsBySymbolOrAsset(tokenRegistryAddress: string, symbolOrAsset: string): Promise<number>;
+      /** With a single argument (or a null registry) the official token registry is used. */
+      getDecimalsBySymbolOrAsset(symbolOrAsset: string): Promise<number>;
+      getDecimalsBySymbolOrAsset(
+        tokenRegistryAddress: string | null,
+        symbolOrAsset: string,
+      ): Promise<number>;
       
       getOfficialTokenRegistryAddress(): string;
       

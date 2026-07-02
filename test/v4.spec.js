@@ -253,6 +253,63 @@ describe('v4 compose', () => {
   });
 });
 
+describe('token registry helpers (default registry)', () => {
+  const OFFICIAL = 'O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ';
+  const ASSET = 'n9y3VomFeWFeZZ2PcSEcmyBb/bI7CzKcYsFF2umf4X0=';
+  const DESC = 'descHashdescHashdescHashdescHashdescHash12s=';
+
+  function makeRegistryClient() {
+    const client = new Client('wss://fake');
+    const captured = [];
+    client.client.handlers = {
+      'light/get_aa_state_vars': (params) => {
+        captured.push(params);
+        if (params.var_prefix.startsWith('a2s_')) return { [`a2s_${ASSET}`]: 'TST' };
+        if (params.var_prefix.startsWith('s2a_')) return { s2a_TST: ASSET };
+        if (params.var_prefix.startsWith('current_desc_')) {
+          return { [`current_desc_${ASSET}`]: DESC };
+        }
+        if (params.var_prefix.startsWith('decimals_')) return { [`decimals_${DESC}`]: 8 };
+        return {};
+      },
+    };
+    return { client, captured };
+  }
+
+  it('getSymbolByAsset with one argument uses the official registry', async () => {
+    const { client, captured } = makeRegistryClient();
+    expect(await client.api.getSymbolByAsset(ASSET)).toEqual('TST');
+    expect(captured[0].address).toEqual(OFFICIAL);
+  });
+
+  it('getSymbolByAsset still accepts an explicit registry', async () => {
+    const { client, captured } = makeRegistryClient();
+    expect(await client.api.getSymbolByAsset(address, ASSET)).toEqual('TST');
+    expect(captured[0].address).toEqual(address);
+  });
+
+  it('null registry with two arguments falls back to the official one', async () => {
+    const { client, captured } = makeRegistryClient();
+    expect(await client.api.getAssetBySymbol(null, 'TST')).toEqual(ASSET);
+    expect(captured[0].address).toEqual(OFFICIAL);
+  });
+
+  it('base/GBYTE shortcuts work without any request', async () => {
+    const { client, captured } = makeRegistryClient();
+    expect(await client.api.getSymbolByAsset('base')).toEqual('GBYTE');
+    expect(await client.api.getSymbolByAsset(null)).toEqual('GBYTE');
+    expect(await client.api.getAssetBySymbol('GBYTE')).toEqual('base');
+    expect(await client.api.getDecimalsBySymbolOrAsset('GBYTE')).toEqual(9);
+    expect(captured.length).toEqual(0);
+  });
+
+  it('getDecimalsBySymbolOrAsset with one argument resolves through the official registry', async () => {
+    const { client, captured } = makeRegistryClient();
+    expect(await client.api.getDecimalsBySymbolOrAsset('TST')).toEqual(8);
+    expect(captured.every((p) => p.address === OFFICIAL)).toEqual(true);
+  });
+});
+
 describe('API mapping', () => {
   it('exposes every api.json command as a method sending that exact command', async () => {
     const client = new Client('wss://fake');

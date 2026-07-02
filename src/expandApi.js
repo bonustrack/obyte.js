@@ -1,10 +1,13 @@
 import utils from './utils';
+import { withDefaultRegistry } from './internal';
+import { OFFICIAL_TOKEN_REGISTRY_ADDRESS } from './constants';
 
 function getOfficialTokenRegistryAddress() {
-  return 'O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ';
+  return OFFICIAL_TOKEN_REGISTRY_ADDRESS;
 }
 
-async function getSymbolByAsset(tokenRegistryAddress, asset) {
+async function getSymbolByAsset(registryOrAsset, maybeAsset) {
+  const [tokenRegistryAddress, asset] = withDefaultRegistry(registryOrAsset, maybeAsset);
   if (asset === null || asset === 'base') {
     return 'GBYTE';
   }
@@ -27,7 +30,8 @@ async function getSymbolByAsset(tokenRegistryAddress, asset) {
   return asset.replace(/[+=]/g, '').substr(0, 6);
 }
 
-async function getAssetBySymbol(tokenRegistryAddress, symbol) {
+async function getAssetBySymbol(registryOrSymbol, maybeSymbol) {
+  const [tokenRegistryAddress, symbol] = withDefaultRegistry(registryOrSymbol, maybeSymbol);
   if (typeof symbol !== 'string') {
     return null;
   }
@@ -51,7 +55,8 @@ async function getAssetBySymbol(tokenRegistryAddress, symbol) {
   return null;
 }
 
-async function getDecimalsBySymbolOrAsset(tokenRegistryAddress, symbolOrAsset) {
+async function getDecimalsBySymbolOrAsset(registryOrValue, maybeValue) {
+  const [tokenRegistryAddress, symbolOrAsset] = withDefaultRegistry(registryOrValue, maybeValue);
   if (!utils.isValidAddress(tokenRegistryAddress)) {
     throw Error('Not valid tokenRegistryAddress');
   }

@@ -2,7 +2,11 @@ import ecdsa from 'secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 import { base32, base64 } from '@scure/base';
-import { VERSION_WITHOUT_TIMESTAMP, VERSION_WITHOUT_TIMESTAMP_TESTNET } from './constants';
+import {
+  VERSION_WITHOUT_TIMESTAMP,
+  VERSION_WITHOUT_TIMESTAMP_TESTNET,
+  OFFICIAL_TOKEN_REGISTRY_ADDRESS,
+} from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
 const PARENT_UNITS_KEY_SIZE = 'parent_units'.length;
@@ -112,6 +116,19 @@ export const mapAPI = (api, impl) =>
     }),
     {},
   );
+
+// Resolves the optional leading registry argument of the token-registry helpers:
+// (value) → [official registry, value]; (null | undefined, value) → same;
+// (registry, value) → as given. Explicit undefined value means "no value".
+export function withDefaultRegistry(tokenRegistryAddress, value) {
+  if (value === undefined) {
+    return [OFFICIAL_TOKEN_REGISTRY_ADDRESS, tokenRegistryAddress];
+  }
+  if (tokenRegistryAddress === undefined || tokenRegistryAddress === null) {
+    return [OFFICIAL_TOKEN_REGISTRY_ADDRESS, value];
+  }
+  return [tokenRegistryAddress, value];
+}
 
 export const sign = (hash, privKey) => {
   const res = ecdsa.ecdsaSign(hash, privKey);

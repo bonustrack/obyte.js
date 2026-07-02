@@ -18,6 +18,7 @@ export const V4_UPGRADE_MCI_TESTNET = 3522600;
 export const MAX_AA_RESPONSES = 10;
 // fixed fee charged for a system_vote_count message, enters the input/output balance
 export const SYSTEM_VOTE_COUNT_FEE = 1e9;
+export const OFFICIAL_TOKEN_REGISTRY_ADDRESS = 'O6H6ZIFI57X3PLTYHOCVYPP5A553CYFQ';
 export const HEARTBEAT_TIMEOUT = 10 * 1000;
 export const HEARTBEAT_RESPONSE_TIMEOUT = 60 * 1000;
 export const HEARTBEAT_PAUSE_TIMEOUT = 2 * HEARTBEAT_TIMEOUT;
