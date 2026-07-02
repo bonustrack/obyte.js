@@ -2,16 +2,10 @@ import WSClient from './wsclient';
 import utils from './utils';
 import {
   DEFAULT_NODE,
-  VERSION,
-  VERSION_TESTNET,
   ALT,
   ALT_TESTNET,
-  VERSION_WITHOUT_KEY_SIZES,
-  VERSION4,
-  VERSION4_TESTNET,
-  KEY_SIZE_UPGRADE_MCI,
-  V4_UPGRADE_MCI,
-  V4_UPGRADE_MCI_TESTNET,
+  VERSION,
+  VERSION_TESTNET,
   MAX_AA_RESPONSES,
   SYSTEM_VOTE_COUNT_FEE,
 } from './constants';
@@ -101,23 +95,18 @@ export default class Client {
           }),
           self.api.getDefinitionForAddress({ address }),
         ]);
-        const bWithKeys =
-          conf.testnet || lightProps.last_stable_mc_ball_mci >= KEY_SIZE_UPGRADE_MCI;
-        const bV4 =
-          lightProps.last_stable_mc_ball_mci >=
-          (conf.testnet ? V4_UPGRADE_MCI_TESTNET : V4_UPGRADE_MCI);
-        let version;
-        if (bV4) {
-          version = conf.testnet ? VERSION4_TESTNET : VERSION4;
-        } else if (conf.testnet) {
-          version = VERSION_TESTNET;
-        } else if (bWithKeys) {
-          version = VERSION;
-        } else {
-          version = VERSION_WITHOUT_KEY_SIZES;
+        // a v4 hub always quotes tps_fee (we send from_addresses); its absence means
+        // the chain is still pre-v4 or the hub runs outdated ocore — composing
+        // pre-v4 units (versions 1.0-3.0) is not supported anymore
+        if (typeof lightProps.tps_fee !== 'number') {
+          throw new Error(
+            'the hub did not quote tps_fee — it is on a pre-v4 chain or runs outdated software; composing pre-v4 units is not supported',
+          );
         }
-        // v4+: tps_fee is a required unit field and enters the input/output balance
-        const tpsFee = bV4 ? lightProps.tps_fee || 0 : 0;
+        const version = conf.testnet ? VERSION_TESTNET : VERSION;
+        const bWithKeys = true; // all v4 units count object keys toward size
+        // tps_fee is a required unit field and enters the input/output balance
+        const tpsFee = lightProps.tps_fee;
         // a system_vote_count message costs a fixed fee that also enters the balance
         const voteCountFee = messages.some((m) => m.app === 'system_vote_count')
           ? SYSTEM_VOTE_COUNT_FEE
@@ -178,18 +167,12 @@ export default class Client {
           // the hub quoted tps_fee for its own timestamp, so we must reuse it
           timestamp: lightProps.timestamp || Math.round(Date.now() / 1000),
         };
-        if (bV4) {
-          unit.tps_fee = tpsFee;
-          if (lightProps.count_primary_aa_triggers && typeof conf.max_aa_responses === 'number') {
-            unit.max_aa_responses = conf.max_aa_responses;
-          }
-        }
-        if (lightProps.witness_list_unit) {
-          // v4+ hubs no longer return it: the witness list is the common op list
-          unit.witness_list_unit = lightProps.witness_list_unit;
+        unit.tps_fee = tpsFee;
+        if (lightProps.count_primary_aa_triggers && typeof conf.max_aa_responses === 'number') {
+          unit.max_aa_responses = conf.max_aa_responses;
         }
 
-        const author = { address, authentifiers: bWithKeys ? path : {} }; // we temporarily place the path there to have its length counted
+        const author = { address, authentifiers: path }; // we temporarily place the path there to have its length counted
         if (isDefinitionRequired) {
           author.definition = definition;
         }

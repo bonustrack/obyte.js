@@ -1,18 +1,15 @@
 export const DEFAULT_NODE = 'wss://obyte.org/bb';
-export const VERSION = '3.0';
-export const VERSION_TESTNET = '3.0t';
-export const VERSION_WITHOUT_KEY_SIZES = '2.0';
+// versions 1.0-3.0 exist only on the read side (hashing/validating historical
+// units and signed messages); composing always produces version 4.0 units
 export const VERSION_WITHOUT_TIMESTAMP = '1.0';
 export const VERSION_WITHOUT_TIMESTAMP_TESTNET = '1.0t';
-export const VERSION4 = '4.0';
-export const VERSION4_TESTNET = '4.0t';
+// the current protocol version, ocore constants.version
+export const VERSION = '4.0';
+export const VERSION_TESTNET = '4.0t';
 // ocore constants.supported_versions (livenet + testnet variants)
 export const SUPPORTED_VERSIONS = ['1.0', '2.0', '3.0', '4.0', '1.0t', '2.0t', '3.0t', '4.0t'];
 export const ALT = '1';
 export const ALT_TESTNET = '2';
-export const KEY_SIZE_UPGRADE_MCI = 5530000;
-export const V4_UPGRADE_MCI = 10968000;
-export const V4_UPGRADE_MCI_TESTNET = 3522600;
 // ocore constants.MAX_RESPONSES_PER_PRIMARY_TRIGGER: validators assume this many
 // prepaid AA responses per trigger when the unit doesn't declare max_aa_responses
 export const MAX_AA_RESPONSES = 10;

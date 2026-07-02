@@ -15,7 +15,7 @@ import {
   isNonemptyObject,
   hasFieldsExcept,
 } from './internal';
-import { VERSION4, VERSION4_TESTNET, SUPPORTED_VERSIONS } from './constants';
+import { VERSION, VERSION_TESTNET, SUPPORTED_VERSIONS } from './constants';
 
 // WIF codec (replaces the `wif` package, which pulled create-hash + node stream polyfills).
 // base58check uses double-sha256 for the checksum, same as the previous implementation.
@@ -63,7 +63,7 @@ function signMessage(message, options = {}) {
   const address = conf.address || getChash160(definition);
   const path = conf.path || 'r';
   // current ocore signs messages with version 4.0 (constants.version)
-  const version = conf.testnet ? VERSION4_TESTNET : VERSION4;
+  const version = conf.testnet ? VERSION_TESTNET : VERSION;
 
   const objUnit = {
     version,

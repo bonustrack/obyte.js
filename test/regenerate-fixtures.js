@@ -1,5 +1,5 @@
 /* Regenerates test/units.fixtures.json — real mainnet joints of every protocol
-   version (1.0 genesis, 2.0, 3.0, 4.0) used by v4hash.spec.js to pin getUnitHash.
+   version (1.0 genesis, 2.0, 3.0, 4.0) used by unit-hashes.spec.js to pin getUnitHash.
    Usage: npm run build:cjs && node test/regenerate-fixtures.js */
 const fs = require('fs');
 const path = require('path');
@@ -24,13 +24,15 @@ async function main() {
   }
 
   await addUnit('v1', GENESIS);
-  // registry triggers pick units from the 2.0 and 3.0 eras deterministically enough
+  // registry triggers pin one unit per protocol era; every query below is
+  // anchored to fixed mci bounds, so regeneration is idempotent
   const early = await client.api.getAaResponses({ aa: REGISTRY, order: 'ASC' });
   await addUnit('v2', early[0].trigger_unit);
   const mid = await client.api.getAaResponses({ aa: REGISTRY, max_mci: 9000000, order: 'DESC' });
   await addUnit('v3', mid[0].trigger_unit);
-  const props = await client.api.getLastStableUnitProps();
-  await addUnit('v4', props.unit);
+  // first registry trigger at/after the v4 upgrade (mainnet v4UpgradeMci)
+  const v4era = await client.api.getAaResponses({ aa: REGISTRY, min_mci: 10968000, order: 'ASC' });
+  await addUnit('v4', v4era[0].trigger_unit);
 
   const file = path.join(__dirname, 'units.fixtures.json');
   fs.writeFileSync(file, `${JSON.stringify(fixtures, null, 2)}\n`);

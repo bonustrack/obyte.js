@@ -1,5 +1,5 @@
 /**
- * v4 compose + API mapping tests, fully offline: the WSClient module is mocked so
+ * Compose + API mapping tests, fully offline: the WSClient module is mocked so
  * every hub command is routed to a canned per-command handler and recorded, letting
  * tests assert both the composed unit and the exact wire requests.
  * @jest-environment node
@@ -47,7 +47,7 @@ const RECIPIENT = '2TO6NYBGX3NF5QS24MQLFR7KXYAMCIE5';
 const FAKE_INPUT_UNIT = 'oj8yEksX9Ubq7lLc+p6F2uyHUuynugeVq4+ikT67X6E=';
 const WITNESSES = Array.from({ length: 12 }, (_, i) => `WITNESS${i}`);
 
-const V4_PROPS = {
+const HUB_QUOTE = {
   timestamp: 1700000000,
   parent_units: ['pBAbllHPZKWxs4VQikR2dsxmJBJlbnnqDzPJ3Qiiun8='],
   last_stable_mc_ball: 'mYSB+hzqVWT5163HfbNu4vV7IIzT2+5nKxEX2x8U65o=',
@@ -57,7 +57,7 @@ const V4_PROPS = {
   count_primary_aa_triggers: 0,
 };
 
-function makeClient({ lightProps = V4_PROPS, totalAmount = 1000000 } = {}) {
+function makeClient({ lightProps = HUB_QUOTE, totalAmount = 1000000 } = {}) {
   const client = new Client('wss://fake');
   client.client.handlers = {
     get_witnesses: () => WITNESSES,
@@ -89,7 +89,7 @@ const parentsRequest = (client) =>
 const pickRequest = (client) =>
   client.client.requests.find((r) => r.command === 'light/pick_divisible_coins_for_amount');
 
-describe('v4 compose', () => {
+describe('compose', () => {
   it('composes a version 4.0 unit from a v4 hub quote', async () => {
     const client = makeClient();
     const unit = await client.compose.payment(
@@ -101,7 +101,7 @@ describe('v4 compose', () => {
     expect(unit.alt).toEqual('1');
     expect(unit.tps_fee).toEqual(12);
     // the hub computed tps_fee for its own timestamp, so compose must reuse it
-    expect(unit.timestamp).toEqual(V4_PROPS.timestamp);
+    expect(unit.timestamp).toEqual(HUB_QUOTE.timestamp);
     expect('witnesses' in unit).toEqual(false);
     expect('witness_list_unit' in unit).toEqual(false);
     expect('max_aa_responses' in unit).toEqual(false);
@@ -138,7 +138,7 @@ describe('v4 compose', () => {
       { outputs: [{ address: RECIPIENT, amount: 1000 }] },
       { privateKey },
     );
-    const noFee = makeClient({ lightProps: { ...V4_PROPS, tps_fee: 0 } });
+    const noFee = makeClient({ lightProps: { ...HUB_QUOTE, tps_fee: 0 } });
     await noFee.compose.payment(
       { outputs: [{ address: RECIPIENT, amount: 1000 }] },
       { privateKey },
@@ -151,7 +151,7 @@ describe('v4 compose', () => {
 
   it('writes max_aa_responses into the unit when set explicitly and AAs are triggered', async () => {
     const client = makeClient({
-      lightProps: { ...V4_PROPS, count_primary_aa_triggers: 1 },
+      lightProps: { ...HUB_QUOTE, count_primary_aa_triggers: 1 },
     });
     const unit = await client.compose.payment(
       { outputs: [{ address: RECIPIENT, amount: 1000 }] },
@@ -163,34 +163,25 @@ describe('v4 compose', () => {
     expect(getUnitHash(unit)).toEqual(unit.unit);
   });
 
-  it('composes a 3.0 unit with witness_list_unit from a pre-v4 quote', async () => {
+  it('refuses to compose against a pre-v4 chain', async () => {
     const client = makeClient({
       lightProps: {
         timestamp: 1650000000,
-        parent_units: V4_PROPS.parent_units,
-        last_stable_mc_ball: V4_PROPS.last_stable_mc_ball,
-        last_stable_mc_ball_unit: V4_PROPS.last_stable_mc_ball_unit,
+        parent_units: HUB_QUOTE.parent_units,
+        last_stable_mc_ball: HUB_QUOTE.last_stable_mc_ball,
+        last_stable_mc_ball_unit: HUB_QUOTE.last_stable_mc_ball_unit,
         last_stable_mc_ball_mci: 6000000,
         witness_list_unit: 'J8QFgTLI+3EkuAxX+eL6a0q114PJ4h4EOAiHAzxUp24=',
       },
     });
-    const unit = await client.compose.payment(
-      { outputs: [{ address: RECIPIENT, amount: 1000 }] },
-      { privateKey },
-    );
-
-    expect(unit.version).toEqual('3.0');
-    expect(unit.witness_list_unit).toEqual('J8QFgTLI+3EkuAxX+eL6a0q114PJ4h4EOAiHAzxUp24=');
-    expect('tps_fee' in unit).toEqual(false);
-    expect(1000000).toEqual(
-      outputsTotal(unit) + unit.headers_commission + unit.payload_commission,
-    );
-    expect(getUnitHash(unit)).toEqual(unit.unit);
+    await expect(
+      client.compose.payment({ outputs: [{ address: RECIPIENT, amount: 1000 }] }, { privateKey }),
+    ).rejects.toThrow('pre-v4 chain');
   });
 
   it('composes a 4.0t unit on testnet past its v4 upgrade mci', async () => {
     const client = makeClient({
-      lightProps: { ...V4_PROPS, last_stable_mc_ball_mci: 4000000 },
+      lightProps: { ...HUB_QUOTE, last_stable_mc_ball_mci: 4000000 },
     });
     const unit = await client.compose.payment(
       { outputs: [{ address: RECIPIENT, amount: 1000 }] },
@@ -202,22 +193,21 @@ describe('v4 compose', () => {
     expect(unit.tps_fee).toEqual(12);
   });
 
-  it('composes a 3.0t unit on testnet before its v4 upgrade mci', async () => {
+  it('refuses to compose on testnet before its v4 upgrade mci', async () => {
     const client = makeClient({
       lightProps: {
-        ...V4_PROPS,
+        ...HUB_QUOTE,
         last_stable_mc_ball_mci: 3000000,
         tps_fee: undefined,
         witness_list_unit: 'J8QFgTLI+3EkuAxX+eL6a0q114PJ4h4EOAiHAzxUp24=',
       },
     });
-    const unit = await client.compose.payment(
-      { outputs: [{ address: RECIPIENT, amount: 1000 }] },
-      { privateKey, testnet: true },
-    );
-
-    expect(unit.version).toEqual('3.0t');
-    expect('tps_fee' in unit).toEqual(false);
+    await expect(
+      client.compose.payment(
+        { outputs: [{ address: RECIPIENT, amount: 1000 }] },
+        { privateKey, testnet: true },
+      ),
+    ).rejects.toThrow('pre-v4 chain');
   });
 
   it('charges the fixed 1e9 fee for system_vote_count', async () => {
