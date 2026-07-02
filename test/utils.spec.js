@@ -50,7 +50,7 @@ describe('utils', () => {
       const signedMessageJson = JSON.stringify(objSignedMessage);
       const signedMessageBase64 = Buffer.from(signedMessageJson).toString('base64');
       expect(signedMessageBase64).toEqual(
-        'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6Iko1R1FDSFFNN1dKR1RJUTI1RkRQUjRRS0RHQ0FESkdUIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTFGVkY0QTJIcHJSRGxjNlZvYlIxWjBvUEF6NXpaQjdQRk1tazZSVUkwN3kifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkZiNERlbmczWHVuSUZ3TytZM0thZ0pyOUg5MUtMN3c1UUk4aFIwN3hwSkorY3BjU0RZbFQwc25sSXNwNDRJUWJiMURHK2NUdzVYSjljbDRCMGxjNDNRPT0ifX1dfQ==',
+        'eyJ2ZXJzaW9uIjoiNC4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6Iko1R1FDSFFNN1dKR1RJUTI1RkRQUjRRS0RHQ0FESkdUIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTFGVkY0QTJIcHJSRGxjNlZvYlIxWjBvUEF6NXpaQjdQRk1tazZSVUkwN3kifV0sImF1dGhlbnRpZmllcnMiOnsiciI6ImQ1QkRpSmgwMndIUlYwdGNOWjZpUmkyb2R0cTliNjY3SDVIb2czdFIxVUlNSEJTbHFPMGFxcTVQK2hIU1N0UU02WUFJSklpcXRXWklyT0ttMzFaWVdRPT0ifX1dfQ==',
       );
     });
     it('should sign message with wif in object', () => {
@@ -59,7 +59,7 @@ describe('utils', () => {
       const signedMessageJson = JSON.stringify(objSignedMessage);
       const signedMessageBase64 = Buffer.from(signedMessageJson).toString('base64');
       expect(signedMessageBase64).toEqual(
-        'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6IldQQkk0UUhaR0o0SEZOQVRPTVBNNDJIREg1UURGSlJXIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTE5eGZXOVVBTk9saGo5Y0svMTNCZEpDRWdNSjJsSCtpWXZheXYwRlBMYk4ifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkFHcnRFUzV0ZlE3Wjh2bzZsSGJEd1JDWHBtcVI3WUZoK0tCMGNlYThFSlpTZmJ2b0VLcE5mWTcyMU1QNFZObUsxa1VtaFBhNnZROVhQZkREOUlMTUtRPT0ifX1dfQ==',
+        'eyJ2ZXJzaW9uIjoiNC4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6IldQQkk0UUhaR0o0SEZOQVRPTVBNNDJIREg1UURGSlJXIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTE5eGZXOVVBTk9saGo5Y0svMTNCZEpDRWdNSjJsSCtpWXZheXYwRlBMYk4ifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IjBjWURwWXZRSm1NUnlQL1N4eFFCRXpDd2VTSWNqN0RTTjVSckR3eFloZFlka2FqYmJwUTlxekN5V0hFVU9NNUFkK085NlY4aWJGakplYUpkcnZ4TzZBPT0ifX1dfQ==',
       );
     });
     it('should sign message with wif as string', () => {
@@ -68,7 +68,7 @@ describe('utils', () => {
       const signedMessageJson = JSON.stringify(objSignedMessage);
       const signedMessageBase64 = Buffer.from(signedMessageJson).toString('base64');
       expect(signedMessageBase64).toEqual(
-        'eyJ2ZXJzaW9uIjoiMy4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6IldQQkk0UUhaR0o0SEZOQVRPTVBNNDJIREg1UURGSlJXIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTE5eGZXOVVBTk9saGo5Y0svMTNCZEpDRWdNSjJsSCtpWXZheXYwRlBMYk4ifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IkFHcnRFUzV0ZlE3Wjh2bzZsSGJEd1JDWHBtcVI3WUZoK0tCMGNlYThFSlpTZmJ2b0VLcE5mWTcyMU1QNFZObUsxa1VtaFBhNnZROVhQZkREOUlMTUtRPT0ifX1dfQ==',
+        'eyJ2ZXJzaW9uIjoiNC4wIiwic2lnbmVkX21lc3NhZ2UiOiJhIiwiYXV0aG9ycyI6W3siYWRkcmVzcyI6IldQQkk0UUhaR0o0SEZOQVRPTVBNNDJIREg1UURGSlJXIiwiZGVmaW5pdGlvbiI6WyJzaWciLHsicHVia2V5IjoiQTE5eGZXOVVBTk9saGo5Y0svMTNCZEpDRWdNSjJsSCtpWXZheXYwRlBMYk4ifV0sImF1dGhlbnRpZmllcnMiOnsiciI6IjBjWURwWXZRSm1NUnlQL1N4eFFCRXpDd2VTSWNqN0RTTjVSckR3eFloZFlka2FqYmJwUTlxekN5V0hFVU9NNUFkK085NlY4aWJGakplYUpkcnZ4TzZBPT0ifX1dfQ==',
       );
     });
   });
@@ -126,6 +126,20 @@ describe('utils', () => {
       expect(
         utils.validateSignedMessage(objSignedMessage, 'J5GQCHQM7WJGTIQ25FDPR4QKDGCADJGT', 'a'),
       ).toEqual(false);
+    });
+    it('validates a freshly signed 4.0 message (roundtrip)', () => {
+      const wif = '5JHx9t7DSSnYwroYbBFodKLDGZggsgfBpaMFok6VMPPMu49UJgA';
+      const objSignedMessage = utils.signMessage('hello', { wif });
+      expect(objSignedMessage.version).toEqual('4.0');
+      expect(
+        utils.validateSignedMessage(objSignedMessage, objSignedMessage.authors[0].address, 'hello'),
+      ).toEqual(true);
+    });
+    it('rejects versions outside the ocore supported list', () => {
+      const wif = '5JHx9t7DSSnYwroYbBFodKLDGZggsgfBpaMFok6VMPPMu49UJgA';
+      const objSignedMessage = utils.signMessage('hello', { wif });
+      objSignedMessage.version = '5.0';
+      expect(utils.validateSignedMessage(objSignedMessage)).toEqual(false);
     });
     it('should return false (not throw) for non-object input', () => {
       expect(utils.validateSignedMessage(null)).toEqual(false);

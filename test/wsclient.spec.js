@@ -75,6 +75,34 @@ describe('WSClient', () => {
     client.ws.emit('close'); // connection dropped before the response arrived
   });
 
+  it('passes falsy scalar responses through instead of nulling them', (done) => {
+    const client = new WSClient('ws://node', false, false);
+    const received = [];
+    const respond = (response) => {
+      const tag = Object.keys(client.queue)[0];
+      client.ws.emit('message', { data: JSON.stringify(['response', { tag, response }]) });
+    };
+
+    client.request('light/get_data_feed', { feed_name: 'x' }, (err, result) => {
+      received.push([err, result]);
+      client.request('light/get_data_feed', { feed_name: 'y' }, (err2, result2) => {
+        received.push([err2, result2]);
+        client.request('get_witnesses', null, (err3, result3) => {
+          received.push([err3, result3]);
+          expect(received).toEqual([
+            [null, 0], // numeric 0 data feed value must not become null
+            [null, ''], // empty string as well
+            ['some error', null], // {error} responses still reject
+          ]);
+          done();
+        });
+        respond({ error: 'some error' });
+      });
+      respond('');
+    });
+    respond(0);
+  });
+
   it('delivers socket errors to onError subscribers instead of logging', () => {
     const client = new WSClient('ws://node', false, false);
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
