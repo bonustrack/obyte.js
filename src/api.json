@@ -6,6 +6,9 @@
     "params": "string"
   },
   "get_last_mci": {},
+  "get_last_stable_unit_props": {},
+  "get_system_vars": {},
+  "get_system_var_votes": {},
   "catchup": {
     "params": {
       "witnesses": "array",
@@ -35,6 +38,9 @@
       "witnesses": "array",
       "addresses": "array"
     }
+  },
+  "light/get_link_proofs": {
+    "params": "array"
   },
   "light/get_parents_and_last_ball_and_witness_list_unit": {
     "params": {
@@ -94,6 +100,11 @@
       "var_prefix": "string"
     }
   },
+  "light/get_aa_balances": {
+    "params": {
+      "address": "string"
+    }
+  },
   "light/get_aas_by_base_aas": {
     "params": {
       "base_aa": "string",
@@ -141,6 +152,22 @@
     }
   },
   "hub/get_asset_metadata": {
+    "params": "string"
+  },
+  "hub/get_exchange_rates": {},
+  "hub/enable_notification": {
+    "params": "string"
+  },
+  "hub/disable_notification": {
+    "params": "string"
+  },
+  "hub/get_arbstore_url": {
+    "params": "string"
+  },
+  "hub/get_arbstore_address": {
+    "params": "string"
+  },
+  "hub/get_arbstore_url_by_address": {
     "params": "string"
   }
 }

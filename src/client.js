@@ -7,7 +7,13 @@ import {
   ALT,
   ALT_TESTNET,
   VERSION_WITHOUT_KEY_SIZES,
+  VERSION4,
+  VERSION4_TESTNET,
   KEY_SIZE_UPGRADE_MCI,
+  V4_UPGRADE_MCI,
+  V4_UPGRADE_MCI_TESTNET,
+  MAX_AA_RESPONSES,
+  SYSTEM_VOTE_COUNT_FEE,
 } from './constants';
 import {
   createPaymentMessage,
@@ -72,16 +78,51 @@ export default class Client {
         const path = conf.path || 'r';
 
         const witnesses = await self.getCachedWitnesses();
+        // v4+ hubs reject the request without from_addresses ("bad from addresses"):
+        // they need the author and output addresses to compute tps_fee
+        const outputAddresses = [
+          ...new Set(
+            messages
+              .filter((m) => m.app === 'payment')
+              .reduce((a, m) => a.concat(m.payload.outputs || []), [])
+              .map((o) => o.address)
+              .filter(Boolean)
+              .concat(address),
+          ),
+        ];
+        const maxAaResponses =
+          typeof conf.max_aa_responses === 'number' ? conf.max_aa_responses : MAX_AA_RESPONSES;
         const [lightProps, objDefinition] = await Promise.all([
-          self.api.getParentsAndLastBallAndWitnessListUnit({ witnesses }),
+          self.api.getParentsAndLastBallAndWitnessListUnit({
+            witnesses,
+            from_addresses: [address],
+            output_addresses: outputAddresses,
+            max_aa_responses: maxAaResponses,
+          }),
           self.api.getDefinitionForAddress({ address }),
         ]);
         const bWithKeys =
           conf.testnet || lightProps.last_stable_mc_ball_mci >= KEY_SIZE_UPGRADE_MCI;
+        const bV4 =
+          lightProps.last_stable_mc_ball_mci >=
+          (conf.testnet ? V4_UPGRADE_MCI_TESTNET : V4_UPGRADE_MCI);
         let version;
-        if (conf.testnet) version = VERSION_TESTNET;
-        else if (bWithKeys) version = VERSION;
-        else version = VERSION_WITHOUT_KEY_SIZES;
+        if (bV4) {
+          version = conf.testnet ? VERSION4_TESTNET : VERSION4;
+        } else if (conf.testnet) {
+          version = VERSION_TESTNET;
+        } else if (bWithKeys) {
+          version = VERSION;
+        } else {
+          version = VERSION_WITHOUT_KEY_SIZES;
+        }
+        // v4+: tps_fee is a required unit field and enters the input/output balance
+        const tpsFee = bV4 ? lightProps.tps_fee || 0 : 0;
+        // a system_vote_count message costs a fixed fee that also enters the balance
+        const voteCountFee = messages.some((m) => m.app === 'system_vote_count')
+          ? SYSTEM_VOTE_COUNT_FEE
+          : 0;
+        const extraFees = tpsFee + voteCountFee;
         const bJsonBased = true;
 
         if (!objDefinition.definition && objDefinition.is_stable) {
@@ -110,6 +151,7 @@ export default class Client {
               address,
               payloadsLength,
               lightProps.last_stable_mc_ball_mci,
+              extraFees,
             );
             assetPayment.payload.outputs.sort(sortOutputs);
             assetPayment.payload_hash = getBase64Hash(assetPayment.payload, bJsonBased);
@@ -133,9 +175,19 @@ export default class Client {
           parent_units: lightProps.parent_units,
           last_ball: lightProps.last_stable_mc_ball,
           last_ball_unit: lightProps.last_stable_mc_ball_unit,
-          witness_list_unit: lightProps.witness_list_unit,
-          timestamp: Math.round(Date.now() / 1000),
+          // the hub quoted tps_fee for its own timestamp, so we must reuse it
+          timestamp: lightProps.timestamp || Math.round(Date.now() / 1000),
         };
+        if (bV4) {
+          unit.tps_fee = tpsFee;
+          if (lightProps.count_primary_aa_triggers && typeof conf.max_aa_responses === 'number') {
+            unit.max_aa_responses = conf.max_aa_responses;
+          }
+        }
+        if (lightProps.witness_list_unit) {
+          // v4+ hubs no longer return it: the witness list is the common op list
+          unit.witness_list_unit = lightProps.witness_list_unit;
+        }
 
         const author = { address, authentifiers: bWithKeys ? path : {} }; // we temporarily place the path there to have its length counted
         if (isDefinitionRequired) {
@@ -149,7 +201,8 @@ export default class Client {
         for (let i = 0; i < unitMessages[0].payload.outputs.length; i += 1) {
           if (unitMessages[0].payload.outputs[i].address === address) {
             // it's change output
-            unitMessages[0].payload.outputs[i].amount -= headersCommission + payloadCommission;
+            unitMessages[0].payload.outputs[i].amount -=
+              headersCommission + payloadCommission + extraFees;
             break;
           }
         }

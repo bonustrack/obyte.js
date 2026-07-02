@@ -90,8 +90,11 @@ export default class WSClient {
         }
         // handle everything else
         if (tag && this.queue[tag]) {
-          const error = message[1].response ? message[1].response.error || null : null;
-          const result = error ? null : message[1].response || null;
+          const { response } = message[1];
+          // hub errors always come as {error: ...}; scalar responses (including
+          // falsy ones like 0 or '') must be passed through as results
+          const error = response && typeof response === 'object' ? response.error || null : null;
+          const result = error || response === undefined ? null : response;
           const callback = this.queue[tag];
           delete this.queue[tag]; // cleanup
           callback(error, result);

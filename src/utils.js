@@ -15,7 +15,7 @@ import {
   isNonemptyObject,
   hasFieldsExcept,
 } from './internal';
-import { VERSION, VERSION_TESTNET } from './constants';
+import { VERSION4, VERSION4_TESTNET, SUPPORTED_VERSIONS } from './constants';
 
 // WIF codec (replaces the `wif` package, which pulled create-hash + node stream polyfills).
 // base58check uses double-sha256 for the checksum, same as the previous implementation.
@@ -62,7 +62,8 @@ function signMessage(message, options = {}) {
   const definition = conf.definition || ['sig', { pubkey }];
   const address = conf.address || getChash160(definition);
   const path = conf.path || 'r';
-  const version = conf.testnet ? VERSION_TESTNET : VERSION;
+  // current ocore signs messages with version 4.0 (constants.version)
+  const version = conf.testnet ? VERSION4_TESTNET : VERSION4;
 
   const objUnit = {
     version,
@@ -97,10 +98,8 @@ function validateSignedMessage(objSignedMessage, address = null, message = null)
     return false;
   if (!('signed_message' in objSignedMessage)) return false;
   if (message && message !== objSignedMessage.signed_message) return false;
-  if (
-    'version' in objSignedMessage &&
-    !(VERSION === objSignedMessage.version || VERSION_TESTNET === objSignedMessage.version)
-  )
+  // ocore signed_message.js accepts any of constants.supported_versions
+  if ('version' in objSignedMessage && !SUPPORTED_VERSIONS.includes(objSignedMessage.version))
     return false;
   const { authors } = objSignedMessage;
   if (!isNonemptyArray(authors)) return false;

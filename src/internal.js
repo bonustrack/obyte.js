@@ -2,6 +2,7 @@ import ecdsa from 'secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
 import { ripemd160 } from '@noble/hashes/ripemd160';
 import { base32, base64 } from '@scure/base';
+import { VERSION_WITHOUT_TIMESTAMP, VERSION_WITHOUT_TIMESTAMP_TESTNET } from './constants';
 
 const PARENT_UNITS_SIZE = 2 * 44;
 const PARENT_UNITS_KEY_SIZE = 'parent_units'.length;
@@ -20,6 +21,18 @@ const sha256Digest = (data) => sha256(toBytes(data));
 const ripemd160Digest = (data) => ripemd160(toBytes(data));
 const bytesEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
+// version 1.0 units are hashed with getSourceString and carry no timestamp
+const isVersionWithoutTimestamp = (version) =>
+  version === VERSION_WITHOUT_TIMESTAMP || version === VERSION_WITHOUT_TIMESTAMP_TESTNET;
+
+// ocore string_utils.toWellFormedJsonStringify: every surrogate code unit (even valid
+// pairs, e.g. emoji) is escaped so the hashed source string matches ocore byte-for-byte
+const toWellFormedJsonStringify = (variable) =>
+  JSON.stringify(variable).replace(
+    /[\ud800-\udfff]/g,
+    (chr) => `\\u${chr.codePointAt(0).toString(16)}`,
+  );
+
 export const camelCase = (input) =>
   input
     .split('/')
@@ -36,10 +49,12 @@ export async function createPaymentMessage(
   address,
   payloadLength,
   lastBallMci,
+  extraFees = 0,
 ) {
   const amount = outputs.reduce((a, b) => a + b.amount, 0);
 
-  const targetAmount = asset ? amount : 700 + payloadLength + amount;
+  // extra fees (tps_fee, vote count fee) are paid in bytes, so they only inflate the base-asset target
+  const targetAmount = asset ? amount : 700 + payloadLength + amount + extraFees;
 
   const coinsForAmount = await client.api.pickDivisibleCoinsForAmount({
     addresses: [address],
@@ -144,7 +159,13 @@ function getNakedUnit(objUnit) {
   delete objNakedUnit.unit;
   delete objNakedUnit.headers_commission;
   delete objNakedUnit.payload_commission;
+  delete objNakedUnit.oversize_fee;
+  // tps_fee stays: it is signed and hashed (ocore object_hash.js keeps it too)
+  delete objNakedUnit.actual_tps_fee;
   delete objNakedUnit.main_chain_index;
+  if (isVersionWithoutTimestamp(objUnit.version)) {
+    delete objNakedUnit.timestamp;
+  }
 
   if (objNakedUnit.messages) {
     for (let i = 0; i < objNakedUnit.messages.length; i += 1) {
@@ -166,9 +187,12 @@ export function getSourceString(obj) {
     if (variable === null) throw Error(`null value in ${JSON.stringify(obj)}`);
     switch (typeof variable) {
       case 'string':
+        if (variable.includes(STRING_JOIN_CHAR))
+          throw Error(`00 byte in string value in ${JSON.stringify(obj)}`);
         arrComponents.push('s', variable);
         break;
       case 'number':
+        if (!Number.isFinite(variable)) throw Error(`invalid number: ${variable}`);
         arrComponents.push('n', variable.toString());
         break;
       case 'boolean':
@@ -186,6 +210,8 @@ export function getSourceString(obj) {
           keys.forEach((key) => {
             if (typeof variable[key] === 'undefined')
               throw Error(`undefined at ${key} of ${JSON.stringify(obj)}`);
+            if (key.includes(STRING_JOIN_CHAR))
+              throw Error(`00 byte in object key in ${JSON.stringify(obj)}`);
             arrComponents.push(key);
             extractComponents(variable[key]);
           });
@@ -207,8 +233,10 @@ export function getJsonSourceString(obj) {
     if (variable === null) throw Error(`null value in ${JSON.stringify(obj)}`);
     switch (typeof variable) {
       case 'string':
-        return JSON.stringify(variable);
+        return toWellFormedJsonStringify(variable);
       case 'number':
+        if (!Number.isFinite(variable)) throw Error(`invalid number: ${variable}`);
+        return variable.toString();
       case 'boolean':
         return variable.toString();
       case 'object':
@@ -219,7 +247,7 @@ export function getJsonSourceString(obj) {
         const keys = Object.keys(variable).sort(); // eslint-disable-line no-case-declarations
         if (keys.length === 0) throw Error(`empty object in ${JSON.stringify(obj)}`);
         return `{${keys
-          .map((key) => `${JSON.stringify(key)}:${stringify(variable[key])}`)
+          .map((key) => `${toWellFormedJsonStringify(key)}:${stringify(variable[key])}`)
           .join(',')}}`;
       default:
         throw Error(
@@ -373,7 +401,13 @@ export function getHeadersSize(objUnit, bWithKeys) {
   delete objHeader.unit;
   delete objHeader.headers_commission;
   delete objHeader.payload_commission;
+  delete objHeader.oversize_fee;
+  // tps_fee stays: it counts toward the headers size (ocore object_length.js keeps it too)
+  delete objHeader.actual_tps_fee;
   delete objHeader.main_chain_index;
+  if (isVersionWithoutTimestamp(objUnit.version)) {
+    delete objHeader.timestamp;
+  }
   delete objHeader.messages;
   delete objHeader.parent_units; // replaced with PARENT_UNITS_SIZE
   return (
@@ -398,7 +432,11 @@ export function getUnitHashToSign(objUnit) {
   const objNakedUnit = getNakedUnit(objUnit);
   for (let i = 0; i < objNakedUnit.authors.length; i += 1)
     delete objNakedUnit.authors[i].authentifiers;
-  const sourceString = getJsonSourceString(objNakedUnit);
+  // version 1.0 (and version-less packages) predate JSON-based hashing
+  const sourceString =
+    typeof objUnit.version === 'undefined' || isVersionWithoutTimestamp(objUnit.version)
+      ? getSourceString(objNakedUnit)
+      : getJsonSourceString(objNakedUnit);
   return sha256Digest(sourceString);
 }
 
@@ -406,33 +444,43 @@ export function getSignedPackageHashToSign(signedPackage) {
   const unsignedPackage = JSON.parse(JSON.stringify(signedPackage));
   for (let i = 0; i < unsignedPackage.authors.length; i += 1)
     delete unsignedPackage.authors[i].authentifiers;
-  const sourceString = getJsonSourceString(unsignedPackage);
+  const sourceString =
+    typeof signedPackage.version === 'undefined' || isVersionWithoutTimestamp(signedPackage.version)
+      ? getSourceString(unsignedPackage)
+      : getJsonSourceString(unsignedPackage);
   return sha256Digest(sourceString);
 }
 
 function getUnitContentHash(objUnit) {
-  return getBase64Hash(getNakedUnit(objUnit), true);
+  return getBase64Hash(getNakedUnit(objUnit), !isVersionWithoutTimestamp(objUnit.version));
 }
 
 export function getUnitHash(objUnit) {
+  const bVersion2 = !isVersionWithoutTimestamp(objUnit.version);
   if (objUnit.content_hash)
     // already stripped
-    return getBase64Hash(getNakedUnit(objUnit), true);
+    return getBase64Hash(getNakedUnit(objUnit), bVersion2);
   const objStrippedUnit = {
     content_hash: getUnitContentHash(objUnit),
     version: objUnit.version,
     alt: objUnit.alt,
     authors: objUnit.authors.map((author) => ({ address: author.address })), // already sorted
   };
-  if (objUnit.witness_list_unit) objStrippedUnit.witness_list_unit = objUnit.witness_list_unit;
-  else objStrippedUnit.witnesses = objUnit.witnesses;
+  if (objUnit.witness_list_unit) {
+    objStrippedUnit.witness_list_unit = objUnit.witness_list_unit;
+  } else if (objUnit.witnesses) {
+    // v4+ units carry neither: the witness list is the common op list
+    objStrippedUnit.witnesses = objUnit.witnesses;
+  }
   if (objUnit.parent_units) {
     objStrippedUnit.parent_units = objUnit.parent_units;
     objStrippedUnit.last_ball = objUnit.last_ball;
     objStrippedUnit.last_ball_unit = objUnit.last_ball_unit;
   }
-  objStrippedUnit.timestamp = objUnit.timestamp;
-  return getBase64Hash(objStrippedUnit, true);
+  if (bVersion2) {
+    objStrippedUnit.timestamp = objUnit.timestamp;
+  }
+  return getBase64Hash(objStrippedUnit, bVersion2);
 }
 
 export function isNonemptyArray(arr) {
