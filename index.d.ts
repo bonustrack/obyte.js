@@ -578,7 +578,7 @@ declare namespace Obyte {
     };
 
     compose: {
-      message(app, payload, options?: Options): Promise<object>;
+      message(app: string, payload: any, options?: Options): Promise<object>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<object>;
       asset(params: any): Promise<object>;
@@ -599,7 +599,7 @@ declare namespace Obyte {
     };
 
     post: {
-      message(app, payload, options?: Options): Promise<string>;
+      message(app: string, payload: any, options?: Options): Promise<string>;
       addressDefinitionChange(params: any): Promise<object>;
       attestation(params: any): Promise<string>;
       asset(params: any): Promise<object>;
@@ -632,7 +632,7 @@ declare namespace Obyte {
     authors: Array<Author>
   }
 
-  module utils {
+  namespace utils {
     function isValidAddress(address: string): boolean;
     function getChash160(object: object | Array<any>): string;
     function toWif(privateKey: Uint8Array, testnet: boolean): string;
